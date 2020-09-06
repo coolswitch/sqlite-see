@@ -9,4 +9,14 @@ export default function initListener () {
         await dbo.initStructure()
         return dbo.tables;
     })
+
+
+    // ipcMain.handle('db-switch', async (db_dir) => { 
+    // })
+
+    // ipcMain.handle('table-data', async (sql) => { 
+    // })
+
+    // ipcMain.handle('sql-exec', async (sql) => { 
+    // })
 }
