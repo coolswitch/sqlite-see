@@ -1,11 +1,16 @@
 import Vue from 'vue'
 import App from './pages/App.vue'
 import store from './store';
-import { Table, TableColumn } from 'element-ui';
+import { SendMsgToMain } from './utils/ipc'
+import { Table, TableColumn, Message } from 'element-ui';
+
+import './assets/base.css'
 
 Vue.config.productionTip = false
+Vue.prototype.$sendmsg2main = SendMsgToMain;
 Vue.component(Table.name, Table);
 Vue.component(TableColumn.name, TableColumn);
+Vue.component(Message.name, Message);
 
 new Vue({
   store,

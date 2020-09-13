@@ -6,7 +6,7 @@ class DBO {
     this.sequelize = new Sequelize({
       dialectModule: sqlite3, 
       dialect: 'sqlite',
-      storage: dir || '/Users/aliya/.pax-prd-test/20200721163847/db/data.sqlite',
+      storage: dir,
       logging: console.log
     })
     this.tables = {}
@@ -21,6 +21,8 @@ class DBO {
       tableName: 'sqlite_master'
     })
     const res = await __master.findAll({attributes: ['name', 'sql']})
+    if (res.length == 0) throw new Error('数据库连接失败')
+    
     this.tables = {}
     res.forEach(table => {
       table = table.dataValues
@@ -30,6 +32,8 @@ class DBO {
         this.tables[table.name] = table;
       }
     });
+    console.log('this.tables', res)
+    // this.exec('select * from file limit 0,5')
   }
 
   // RefreshStructure () {
@@ -41,9 +45,37 @@ class DBO {
 
   // -- select * from sqlite_master where type="table" and name="app";
 
-  select () {
-
+  async select (sql) {
+    // try {
+      let list = await this.sequelize.query(sql, {type: Sequelize.QueryTypes.SELECT});
+      list = multistageJson2single(list)
+      return list;
+    //   return { list }
+    // } catch (err) {
+    //   return { err }
+    // }
   }
+
+  async exec (sql) {
+    const res = await this.sequelize.query(sql);
+    return res;
+  }
+}
+
+/** 多级json转单级 */
+function multistageJson2single (json) {
+  if (Array.isArray(json)) {
+    json.forEach(item => {
+      for (let key in item) {
+        if (typeof item[key] === 'object') item[key] = JSON.stringify(item[key]);
+      }
+    })
+  } else {
+    for (let key in json) {
+      if (typeof json[key] === 'object') json[key] = JSON.stringify(json[key]);
+    }
+  }
+  return json;
 }
 
 export default DBO

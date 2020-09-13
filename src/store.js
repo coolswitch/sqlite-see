@@ -10,11 +10,15 @@ const store = new Vuex.Store({
       name: '',
       sql: '',
       fields: ''
-    }
+    },
+    table_list: [],
   },
   mutations: {
     setActiveTable(state, table) {
       state.active_table = table;
+    },
+    setTableList(state, table) {
+      state.table_list = table;
     },
   },
   actions: {
