@@ -11,6 +11,14 @@
         :label="field">
       </el-table-column>
     </el-table>
+     <el-pagination
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      :current-page="page_index"
+      :page-sizes="[20, 50, 100, 500]"
+      :page-size="page_size"
+      layout="total, sizes, prev, next, jumper"
+      :total="total" />
   </div>
 </template>
 
@@ -22,7 +30,11 @@ export default {
   },
   data () {
     return {
-      tableData: []
+      tableData: [],
+      total: 0,
+      page_size: 20,
+      page_index: 1,
+      loading: false,
     }
   },
   computed: {
@@ -36,13 +48,24 @@ export default {
     this.Selete()
   },
   methods: {
+    handleSizeChange(val) {
+      this.page_size = val;
+      this.page_index = 1;
+      this.Selete()
+    },
+    handleCurrentChange(val) {
+      this.page_index = val;
+      this.Selete()
+    },
     Selete () {
-      if (!this.tablename) return;
-
-      this.$sendmsg2main('table-data', this.tablename).then((res) => {
-        // ...
-          console.log(44, res)
-          this.tableData = res;
+      if (!this.tablename || this.loading) return;
+      this.loading = true;
+      const params = { tablename: this.tablename, index: this.page_index - 1, size: this.page_size }
+      this.$sendmsg2main('table-data', params).then((res) => {
+        this.loading = false;
+        console.log(44, res)
+        if (res.total) this.total = res.total;
+        this.tableData = res.list;
       })
     }
   }

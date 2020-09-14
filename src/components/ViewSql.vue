@@ -12,9 +12,10 @@
       <el-table
         size="mini"
         height="100%"
-        :data="tableData">
+        v-if="resultData.length"
+        :data="resultData">
         <el-table-column 
-          v-for="field in fields" 
+          v-for="field in resultFields" 
           :key="field"
           :prop="field"
           :label="field">
@@ -32,12 +33,19 @@ export default {
   data () {
     return {
       sql: '',
-      tableData: []
+      resultData: [],
     }
   },
   computed: {
     tablename () { return this.$store.state.active_table.name },
     fields () { return this.$store.state.active_table.fields },
+    resultFields () {
+      if (this.resultData.length) {
+        return Object.keys(this.resultData[0])
+      } else {
+        return [];
+      }
+    }
   },
   methods: {
     Keyup (e) {
@@ -69,7 +77,7 @@ export default {
       console.log('ppppp', sql)
       this.$sendmsg2main('sql-exec', sql).then((res) => {
         console.log(res)
-          this.tableData = res;
+          this.resultData = res;
 
       })
     },
@@ -120,6 +128,7 @@ export default {
     line-height: 26px;
     max-height: 80vh;
     overflow: auto;
+    font-family: none;
 }
 .btn-box {
     height: 40px;
@@ -131,7 +140,8 @@ export default {
 
 .result-box {
   background: cornsilk;
-    flex-grow: 99;
+  flex-grow: 99;
+  overflow: auto;
 }
 </style>
 <style>

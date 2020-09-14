@@ -15,10 +15,15 @@ export default function initListener () {
     // ipcMain.handle('db-switch', async (db_dir) => { 
     // })
 
-    ipcMain.handle('table-data', async (e, tablename) => {
+    ipcMain.handle('table-data', async (e, { tablename, index, size }) => {
         // console.log('【table-data】', tablename, `select * from ${tablename}`)
-        const list = await dbo.select(`select * from ${tablename}`);
-        return list;
+        const list = await dbo.select(`select * from ${tablename} limit ${index * size}, ${size}`);
+        if (index === 0) {
+            const total = await dbo.select(`select count(*) as total from ${tablename}`);
+            return { list, total: total[0]['total'] }
+        } else {
+            return { list };
+        }
     })
 
     ipcMain.handle('sql-exec', async (e, sql) => { 

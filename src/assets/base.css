@@ -82,4 +82,16 @@
 /* .el-table .cell::-webkit-scrollbar-thumb {
 height: 1px;
 } */
-.el-table__body-wrapper { height: 100% !important; }
+.el-table__body-wrapper { height: calc(100% - 48px) !important; }
+.el-pagination {
+  background: #eee;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  padding: 5px 10px;
+  text-align: right;
+}
+.btn-prev, .btn-next {
+  padding: 0 6px !important;
+  margin: 0 3px !important;
+}

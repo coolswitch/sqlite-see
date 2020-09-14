@@ -32,7 +32,7 @@ class DBO {
         this.tables[table.name] = table;
       }
     });
-    console.log('this.tables', res)
+    // console.log('this.tables', res)
     // this.exec('select * from file limit 0,5')
   }
 
