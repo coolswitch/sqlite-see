@@ -1,15 +1,14 @@
 /** 找注释 */
-export const FindNotes = function(ele, notes_class) {
-    let newtxt = '', notes = 0;
-    ele.innerText.split('\n').forEach(line => {
+export const FindNotes = function(sqlstr) {
+    let notes = [], sql = '';
+    sqlstr.split('\n').forEach((line, index) => {
       if (line.trim().startsWith('--')) {
-        notes += 1;
-        line = `<div class="${notes_class}">${line}</div>`
-      } else line = `${line}\n`
-      newtxt = `${newtxt}${line}`
+        notes.push(index)
+      } else {
+        sql = `${sql} ${line}`
+      }
     })
-    if (ele.querySelectorAll(`.${notes_class}`).length == notes) return false;
-    return newtxt;
+    return { sql, notes};
 }
 
 /** fn后修正光标位置 */
