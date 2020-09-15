@@ -1,9 +1,10 @@
 import DBO from './sqlite'
 import { ipcMain, dialog } from 'electron';  //IpcMainEvent
+// import { PlainObject } from '../typings/index.d'
 
 export default function initListener () {
 
-    let dbo = null
+    let dbo: PlainObject | null = null
 
     ipcMain.handle('db-structure', async (e, dir) => {
         dbo = new DBO(dir)

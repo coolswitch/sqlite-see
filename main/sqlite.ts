@@ -2,7 +2,10 @@ const { Sequelize } = require('sequelize')
 const sqlite3 = require('sqlite3').verbose()
 
 class DBO {
-  constructor (dir) {
+
+  tables: PlainObject = {};
+
+  constructor (dir: string) {
     this.sequelize = new Sequelize({
       dialectModule: sqlite3, 
       dialect: 'sqlite',
