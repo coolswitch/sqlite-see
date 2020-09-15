@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import App from './pages/App.vue'
 import store from './store';
-import { SendMsgToMain } from './utils/ipc'
+import { SendMsgToMain, InitContextmenu } from './utils/ipc'
 import { Table, TableColumn, Pagination, Message } from 'element-ui';
 
 import './assets/base.css'
@@ -17,3 +17,5 @@ new Vue({
   store,
   render: h => h(App),
 }).$mount('#app')
+
+InitContextmenu();

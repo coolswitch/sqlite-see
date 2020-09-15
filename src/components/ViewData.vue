@@ -1,6 +1,7 @@
 <template>
   <div class="data-warp">
     <el-table
+      ref="table"
       size="mini"
       height="100%"
       :data="tableData">
@@ -23,6 +24,7 @@
 </template>
 
 <script>
+
 export default {
   name: 'ViewData',
   props: {
@@ -42,32 +44,33 @@ export default {
     fields () { return this.$store.state.active_table.fields }
   },
   watch: {
-    tablename () { this.Selete(); }
+    tablename () { this.Select(); }
   },
-  created () {
-    this.Selete()
+  mounted () {
+    this.Select()
   },
   methods: {
     handleSizeChange(val) {
       this.page_size = val;
       this.page_index = 1;
-      this.Selete()
+      this.Select()
     },
     handleCurrentChange(val) {
       this.page_index = val;
-      this.Selete()
+      this.Select()
     },
-    Selete () {
+    Select () {
       if (!this.tablename || this.loading) return;
       this.loading = true;
       const params = { tablename: this.tablename, index: this.page_index - 1, size: this.page_size }
+      console.log('[table-data]>', params)
       this.$sendmsg2main('table-data', params).then((res) => {
         this.loading = false;
-        console.log(44, res)
+        console.log('[table-data]<', res)
         if (res.total) this.total = res.total;
         this.tableData = res.list;
       })
-    }
+    },
   }
 }
 </script>

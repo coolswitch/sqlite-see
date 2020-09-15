@@ -99,14 +99,13 @@ export default {
       }
       this.txt = `${this.txt}\n${sqlstr}`
       this.Keyup()
-      console.log('sqlssss', sqlstr)
     },
     Exec () {
       let sql = FindNotes(this.txt).sql;
       if (!sql) return;
-      console.log('ppppp', sql)
+      console.log('[sql-exec]>', sql)
       this.$sendmsg2main('sql-exec', sql).then((res) => {
-        console.log(res)
+        console.log('[sql-exec]<', res)
         this.resultData = res;
       })
     },

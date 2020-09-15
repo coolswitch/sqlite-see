@@ -11,10 +11,6 @@ export default function initListener () {
         return dbo.tables;
     })
 
-
-    // ipcMain.handle('db-switch', async (db_dir) => { 
-    // })
-
     ipcMain.handle('table-data', async (e, { tablename, index, size }) => {
         // console.log('【table-data】', tablename, `select * from ${tablename}`)
         const list = await dbo.select(`select * from ${tablename} limit ${index * size}, ${size}`);
@@ -34,7 +30,7 @@ export default function initListener () {
         return list[0];
     })
 
-
+    // 打开文件
     ipcMain.handle('open-dbfile', () => { 
         return dialog.showOpenDialogSync({ 
             filters: [{ name: 'sqlite', extensions: ['sqlite'] }], 

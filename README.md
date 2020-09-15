@@ -25,6 +25,10 @@ npm run lint
 See [Configuration Reference](https://cli.vuejs.org/config/).
 
 
+[-] 修改数据
+[-] muti sql
+[-] components alive
+
 
 
 /** 颜色 #xxx 2 rgb(x,x,x) */

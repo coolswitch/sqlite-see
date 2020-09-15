@@ -2,7 +2,7 @@
   <div class="left-warp">
     <div class="iconbox">SqliteSee</div>
     <div class="database-warp">
-      {{ dbname }} [切库]
+      {{ dbname }} [切库] 
       <div class="dblist">
         <p v-for="item in database" :key="item.dir" 
           :title="item.dir" 
@@ -45,6 +45,7 @@ export default {
     ...mapState(["active_table"]),
   },
   created() {
+    this.LoadDBList();
     const dir = localStorage.getItem("db-dir");
     if (dir) this.OpenDB(dir);
     else this.OpenNewFile();
@@ -62,7 +63,7 @@ export default {
     },
     LoadDBList () {
       let dblist = localStorage.getItem("db-list");
-      dblist = dblist ? dblist.split(',') : []
+      dblist = dblist ? dblist.substr(1).split(',') : []
       this.database = dblist.map(db => {
         return { name: db.match(/\/([^\\/]*)\.sqlite/)[1], dir: db }
       })
