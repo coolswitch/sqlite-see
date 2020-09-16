@@ -50,6 +50,7 @@ export default {
     ...mapState(["activeTable"])
   },
   created() {
+    console.log("root?", this.$root);
     this.LoadDBList();
     const dir = localStorage.getItem("db-dir");
     if (dir) this.OpenDB(dir);
@@ -57,7 +58,7 @@ export default {
   },
   methods: {
     OpenDB(dir) {
-      this.$sendmsg2main("db-structure", dir)
+      this.$Sendmsg2main("db-structure", dir)
         .then(tables => {
           this.dbdir = dir;
           this.dbname = dir.match(/\/([^\\/]*)\.sqlite/)[1];
@@ -76,7 +77,7 @@ export default {
       });
     },
     OpenNewFile() {
-      this.$sendmsg2main("open-dbfile").then(dbfiles => {
+      this.$Sendmsg2main("open-dbfile").then(dbfiles => {
         if (dbfiles && dbfiles.length) {
           localStorage.setItem("db-dir", dbfiles[0]);
           this.OpenDB(dbfiles[0]);

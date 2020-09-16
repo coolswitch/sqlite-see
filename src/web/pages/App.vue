@@ -22,36 +22,34 @@
   </div>
 </template>
 
-<script>
-import LeftWarp from "../components/LeftWarp";
-import ViewData from "../components/ViewData";
-import ViewSql from "../components/ViewSql";
-import ViewStructure from "../components/ViewStructure";
+<script lang="ts">
+import { Component, Vue } from 'vue-property-decorator';
+import LeftWarp from '../components/LeftWarp.vue';
+import ViewTable from '../components/ViewTable.vue';
+import ViewSql from '../components/ViewSql.vue';
+import ViewStructure from '../components/ViewStructure.vue';
 
-export default {
-  name: "App",
+@Component({
   components: {
     LeftWarp,
-    ViewData,
+    ViewTable,
     ViewSql,
-    ViewStructure
+    ViewStructure,
   },
-  data() {
-    return {
-      navList: [
-        { txt: "数据", comp: "ViewData" },
-        { txt: "结构", comp: "ViewStructure" },
-        { txt: "sql", comp: "ViewSql" }
-      ],
-      acitveComp: ""
-    };
-  },
-  computed: {
-    activeTable() {
-      return this.$store.state.activeTable.name;
-    }
+})
+export default class App extends Vue {
+  navList = [
+    { txt: '数据', comp: 'ViewTable' },
+    { txt: '结构', comp: 'ViewStructure' },
+    { txt: 'sql', comp: 'ViewSql' },
+  ];
+
+  acitveComp = 'ViewTable';
+
+  activeTable() {
+    return this.$store.state.activeTable.name;
   }
-};
+}
 </script>
 
 <style scoped>
@@ -78,7 +76,7 @@ export default {
   overflow: auto;
 }
 .empty::after {
-  content: "SqliteSee";
+  content: 'SqliteSee';
   font-size: 40px;
   font-weight: bold;
   position: absolute;

@@ -131,7 +131,7 @@ export default {
       const sql = FindNotes(this.txt).sql;
       if (!sql) return;
       console.log("[sql-exec]>", sql);
-      this.$sendmsg2main("sql-exec", sql).then(res => {
+      this.$Sendmsg2main("sql-exec", sql).then(res => {
         console.log("[sql-exec]<", res);
         this.resultData = res;
       });

@@ -1,8 +1,8 @@
 export type MessageChannel = {
   // 数据库操作
-  'db-structure': (dir: string) => Promise<DBTable[]>;
-  'table-data': (obj: PlainObject) => Promise<PlainObject>;
-  'sql-exec': (sql: string) => Promise<PlainObject[] | undefined>;
+  "db-structure": (dir: string) => Promise<DBTable[]>;
+  "table-data": (obj: PlainObject) => Promise<PlainObject>;
+  "sql-exec": (sql: string) => Promise<PlainObject[] | undefined>;
   // 原生操作
-  'open-dbfile': () => string[] | undefined;
+  "open-dbfile": () => string[] | undefined;
 };

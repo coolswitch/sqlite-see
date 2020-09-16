@@ -23,14 +23,14 @@
 
 <script>
 export default {
-  name: "ViewData",
+  name: 'ViewTable',
   data() {
     return {
       tableData: [],
       total: 0,
       pageSize: 20,
       pageIndex: 1,
-      loading: false
+      loading: false,
     };
   },
   computed: {
@@ -39,15 +39,18 @@ export default {
     },
     fields() {
       return this.$store.state.activeTable.fields;
-    }
+    },
   },
   watch: {
     tablename() {
       this.Select();
-    }
+    },
   },
   mounted() {
     this.Select();
+    this.$Bus.$on('row-edit', (e) => {
+      console.log(e);
+    });
   },
   methods: {
     handleSizeChange(val) {
@@ -65,17 +68,17 @@ export default {
       const params = {
         tablename: this.tablename,
         index: this.pageIndex - 1,
-        size: this.pageSize
+        size: this.pageSize,
       };
-      console.log("[table-data]>", params);
-      this.$sendmsg2main("table-data", params).then(res => {
+      console.log('[table-data]>', params);
+      this.$Sendmsg2main('table-data', params).then((res) => {
         this.loading = false;
-        console.log("[table-data]<", res);
+        console.log('[table-data]<', res);
         if (res.total) this.total = res.total;
         this.tableData = res.list;
       });
-    }
-  }
+    },
+  },
 };
 </script>
 

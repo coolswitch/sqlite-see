@@ -9,7 +9,7 @@ const store = new Vuex.Store({
     activeTable: {
       name: "",
       sql: "",
-      fields: "",
+      fields: ""
     },
     tableList: []
   },
