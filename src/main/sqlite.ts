@@ -3,7 +3,9 @@ const sqlite3 = require('sqlite3').verbose()
 
 class DBO {
 
-  tables: PlainObject = {};
+  private sequelize: any;
+
+  tables: DBTable[] = [];
 
   constructor (dir: string) {
     this.sequelize = new Sequelize({
@@ -12,7 +14,6 @@ class DBO {
       storage: dir,
       logging: console.log
     })
-    this.tables = {}
   }
 
   async initStructure () {
@@ -26,16 +27,15 @@ class DBO {
     const res = await __master.findAll({attributes: ['name', 'sql']})
     if (res.length == 0) throw new Error('数据库连接失败')
     
-    this.tables = {}
-    res.forEach(table => {
+    this.tables = []
+    res.forEach((table: PlainObject) => {
       table = table.dataValues
       if (table.name.indexOf('sqlite_autoindex') <= -1) {
         table.fields = table.sql.replace(/.*\((.*)\).*/, '$1').split(',');
-        table.fields = table.fields.map(f => f.match(/(\S+)/g)[0])
-        this.tables[table.name] = table;
+        table.fields = table.fields.map((f: string) => f.match(/(\S+)/g)![0])
+        this.tables.push(table as DBTable);
       }
     });
-    // console.log('this.tables', res)
     // this.exec('select * from file limit 0,5')
   }
 
@@ -48,7 +48,7 @@ class DBO {
 
   // -- select * from sqlite_master where type="table" and name="app";
 
-  async select (sql) {
+  async select (sql: string) {
     // try {
       let list = await this.sequelize.query(sql, {type: Sequelize.QueryTypes.SELECT});
       list = multistageJson2single(list)
@@ -59,14 +59,14 @@ class DBO {
     // }
   }
 
-  async exec (sql) {
+  async exec (sql: string) {
     const res = await this.sequelize.query(sql);
     return res;
   }
 }
 
 /** 多级json转单级 */
-function multistageJson2single (json) {
+function multistageJson2single (json: PlainObject) {
   if (Array.isArray(json)) {
     json.forEach(item => {
       for (let key in item) {

@@ -6,14 +6,16 @@
 
 <script>
 export default {
-  name: 'ViewStructure',
+  name: "ViewStructure",
   props: {
     msg: String
   },
   computed: {
-    structure () { return this.$store.state.active_table.sql.replace(/ {6}/g,'\n      ') }
+    structure() {
+      return this.$store.state.activeTable.sql.replace(/ {6}/g, "\n      ");
+    }
   }
-}
+};
 </script>
 
 <style scoped>

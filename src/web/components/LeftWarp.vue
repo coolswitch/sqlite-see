@@ -2,12 +2,17 @@
   <div class="left-warp">
     <div class="iconbox">SqliteSee</div>
     <div class="database-warp">
-      {{ dbname }} [切库] 
+      {{ dbname }} [切库]
       <div class="dblist">
-        <p v-for="item in database" :key="item.dir" 
-          :title="item.dir" 
+        <p
+          v-for="item in database"
+          :key="item.dir"
+          :title="item.dir"
           :class="{ active: item.dir == dbdir }"
-          @click="OpenDB(item.dir)">{{ item.name }}</p>
+          @click="OpenDB(item.dir)"
+        >
+          {{ item.name }}
+        </p>
         <p class="add" @click="OpenNewFile">[添加新库]</p>
       </div>
     </div>
@@ -18,7 +23,7 @@
         <li
           v-for="item in tables"
           :key="item.name"
-          :class="{ active: active_table.name === item.name }"
+          :class="{ active: activeTable.name === item.name }"
           @click="switchTable(item)"
         >
           {{ item.name }}
@@ -37,12 +42,12 @@ export default {
     return {
       database: [],
       tables: [],
-      dbname: '请选择一个数据库',
-      dbdir: ''
+      dbname: "请选择一个数据库",
+      dbdir: ""
     };
   },
   computed: {
-    ...mapState(["active_table"]),
+    ...mapState(["activeTable"])
   },
   created() {
     this.LoadDBList();
@@ -52,40 +57,42 @@ export default {
   },
   methods: {
     OpenDB(dir) {
-      this.$sendmsg2main("db-structure", dir).then((tables) => {
-        this.dbdir = dir
-        this.dbname = dir.match(/\/([^\\/]*)\.sqlite/)[1]
-        this.tables = tables;
-        // this.$store.commit("setTableList", tables);
-      }).catch((err) => {
-        this.$message.error(err.message);
+      this.$sendmsg2main("db-structure", dir)
+        .then(tables => {
+          this.dbdir = dir;
+          this.dbname = dir.match(/\/([^\\/]*)\.sqlite/)[1];
+          this.tables = tables;
+          // this.$store.commit("setTableList", tables);
+        })
+        .catch(err => {
+          this.$message.error(err.message);
+        });
+    },
+    LoadDBList() {
+      let dblist = localStorage.getItem("db-list");
+      dblist = dblist ? dblist.substr(1).split(",") : [];
+      this.database = dblist.map(db => {
+        return { name: db.match(/\/([^\\/]*)\.sqlite/)[1], dir: db };
       });
     },
-    LoadDBList () {
-      let dblist = localStorage.getItem("db-list");
-      dblist = dblist ? dblist.substr(1).split(',') : []
-      this.database = dblist.map(db => {
-        return { name: db.match(/\/([^\\/]*)\.sqlite/)[1], dir: db }
-      })
-    },
     OpenNewFile() {
-      this.$sendmsg2main("open-dbfile").then((dbfiles) => {
+      this.$sendmsg2main("open-dbfile").then(dbfiles => {
         if (dbfiles && dbfiles.length) {
           localStorage.setItem("db-dir", dbfiles[0]);
           this.OpenDB(dbfiles[0]);
 
           // 更新数据库列表、并重新加载
           let dblist = localStorage.getItem("db-list");
-          dblist = dblist ? dblist.replace(`,${dbfiles[0]}`, '') : '';
+          dblist = dblist ? dblist.replace(`,${dbfiles[0]}`, "") : "";
           localStorage.setItem("db-list", `${dblist},${dbfiles[0]}`);
-          this.LoadDBList()
+          this.LoadDBList();
         }
       });
     },
     switchTable(item) {
       this.$store.commit("setActiveTable", item);
-    },
-  },
+    }
+  }
 };
 </script>
 

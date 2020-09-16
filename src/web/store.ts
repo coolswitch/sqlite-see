@@ -1,32 +1,32 @@
-import Vuex from 'vuex';
-import Vue from 'vue'; 
+import Vuex from "vuex";
+import Vue from "vue";
 // const { ipcRenderer } = window.require('electron')
 
 Vue.use(Vuex);
 
 const store = new Vuex.Store({
   state: {
-    active_table: {
-      name: '',
-      sql: '',
-      fields: ''
+    activeTable: {
+      name: "",
+      sql: "",
+      fields: "",
     },
-    table_list: [],
+    tableList: []
   },
   mutations: {
     setActiveTable(state, table) {
-      state.active_table = table;
+      state.activeTable = table;
     },
     setTableList(state, table) {
-      state.table_list = table;
-    },
+      state.tableList = table;
+    }
   },
   actions: {
     // refreshCurUser(context) {
     // },
     // refreshPreference(context) {
     // },
-  },
+  }
 });
 
 export default store;
