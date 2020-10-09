@@ -1,5 +1,5 @@
-import Vuex from "vuex";
-import Vue from "vue";
+import Vuex from 'vuex';
+import Vue from 'vue';
 // const { ipcRenderer } = window.require('electron')
 
 Vue.use(Vuex);
@@ -7,11 +7,11 @@ Vue.use(Vuex);
 const store = new Vuex.Store({
   state: {
     activeTable: {
-      name: "",
-      sql: "",
-      fields: ""
+      name: '',
+      sql: '',
+      fields: '',
     },
-    tableList: []
+    tableList: [],
   },
   mutations: {
     setActiveTable(state, table) {
@@ -19,14 +19,14 @@ const store = new Vuex.Store({
     },
     setTableList(state, table) {
       state.tableList = table;
-    }
+    },
   },
   actions: {
     // refreshCurUser(context) {
     // },
     // refreshPreference(context) {
     // },
-  }
+  },
 });
 
 export default store;

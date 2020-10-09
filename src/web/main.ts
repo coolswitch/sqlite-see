@@ -1,14 +1,14 @@
-import Vue from "vue";
-import App from "./pages/App.vue";
-import store from "./store";
-import { SendMsgToMain, Contextmenu } from "./utils/ipc";
-import { Table, TableColumn, Pagination, Message } from "element-ui";
+import Vue from 'vue';
+import App from './pages/App.vue';
+import store from './store';
+import { SendMsgToMain, Contextmenu } from './utils/ipc';
+import { Table, TableColumn, Pagination, Message } from 'element-ui';
 
-import "element-ui/lib/theme-chalk/table.css";
-import "element-ui/lib/theme-chalk/table-column.css";
-import "element-ui/lib/theme-chalk/pagination.css";
-import "element-ui/lib/theme-chalk/message.css";
-import "./assets/base.css";
+import 'element-ui/lib/theme-chalk/table.css';
+import 'element-ui/lib/theme-chalk/table-column.css';
+import 'element-ui/lib/theme-chalk/pagination.css';
+import 'element-ui/lib/theme-chalk/message.css';
+import './assets/base.css';
 
 Vue.config.productionTip = false;
 Vue.component(Table.name, Table);
@@ -20,9 +20,9 @@ Vue.prototype.$Bus = new Vue();
 
 new Vue({
   store,
-  render: h => h(App)
+  render: (h) => h(App),
 })
-  .$mount("#app")
+  .$mount('#app')
   .$nextTick(() => {
     new Contextmenu(Vue.prototype.$Bus);
   });

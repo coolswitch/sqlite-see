@@ -1,14 +1,14 @@
 module.exports = {
   pages: {
     index: {
-      entry: "src/web/main.ts" // Previously main.js
-    }
+      entry: 'src/web/main.ts', // Previously main.js
+    },
   },
 
   pluginOptions: {
     electronBuilder: {
-      mainProcessFile: "src/main/background.ts" // Previously background.js
-    }
+      mainProcessFile: 'src/main/background.ts', // Previously background.js
+    },
     // Use this to change the entrypoint of your app's main process
     // mainProcessFile: './src/main/background.ts',
     // Provide an array of files that, when changed, will recompile the main process and restart Electron
@@ -19,5 +19,5 @@ module.exports = {
     // Note that it is ignored when --debug flag is used with "electron:serve", as you must launch Electron yourself
     // Command line args (excluding --debug, --dashboard, and --headless) are passed to Electron as well
     // mainProcessArgs: ['--arg-name', 'arg-value']
-  }
+  },
 };

@@ -1,6 +1,11 @@
 <template>
   <div class="data-warp">
-    <el-table ref="table" size="mini" height="100%" :data="tableData">
+    <el-table
+      ref="table"
+      size="mini"
+      height="calc(100% - 37px)"
+      :data="tableData"
+    >
       <el-table-column
         v-for="field in fields"
         :key="field"

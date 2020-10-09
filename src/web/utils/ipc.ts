@@ -1,5 +1,5 @@
-import { MenuItem as TypeMenuItem, Menu as TypeMenu } from "electron";
-const { ipcRenderer, remote } = window.require("electron");
+import { MenuItem as TypeMenuItem, Menu as TypeMenu } from 'electron';
+const { ipcRenderer, remote } = window.require('electron');
 const Menu = remote.Menu,
   MenuItem = remote.MenuItem;
 
@@ -21,17 +21,17 @@ export class Contextmenu {
       console.log(cmd, this.busEventParams);
       $Bus.$emit(cmd, this.busEventParams);
     };
-    document.addEventListener("contextmenu", this.Listener.bind(this));
+    document.addEventListener('contextmenu', this.Listener.bind(this));
 
     this.menuTable = this.CreateMenu([
-      { label: "编辑行", id: "row-edit" } as TypeMenuItem,
-      { label: "复制整行", id: "row-copy" } as TypeMenuItem
+      { label: '编辑行', id: 'row-edit' } as TypeMenuItem,
+      { label: '复制整行', id: 'row-copy' } as TypeMenuItem,
     ]);
   }
 
   Listener(e: PlainObject) {
     // 数据右键菜单
-    if (e.target.className === "cell") {
+    if (e.target.className === 'cell') {
       e.preventDefault();
       this.busEventParams = e.path[2].rowIndex;
       // console.log("----", e.path[2], e.path[2].rowIndex);

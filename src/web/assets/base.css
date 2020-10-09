@@ -95,3 +95,32 @@ height: 1px;
   padding: 0 6px !important;
   margin: 0 3px !important;
 }
+
+
+
+
+
+/*滚动条样式：谷歌浏览器下*/
+.el-table__body-wrapper::-webkit-scrollbar{
+  width: 8px;
+  height: 8px;
+  background-color: transparent;
+}
+/*滚动条的轨道*/
+.el-table__body-wrapper::-webkit-scrollbar-track{
+  /*box-shadow: inset 0 0 5px rgba(0,0,0,.3);*/
+  background-color: rgb(0, 0, 0, .1);
+ 
+}
+/*滚动条的滑块按钮*/
+.el-table__body-wrapper::-webkit-scrollbar-thumb{
+  border-radius: 8px;
+  background-color: rgb(0, 0, 0, .1);
+  box-shadow: inset 0 0 5px rgb(0, 0, 0, .35);
+}
+
+
+.el_tableDiv{
+  height: 420px;
+  overflow-y:auto;
+}
