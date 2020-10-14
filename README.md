@@ -27,7 +27,7 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 
 [] muti sql 100%
 [] 修改数据 100%
-[] 
+[] 优化包大小，现在 500m 30%
 
 
 
