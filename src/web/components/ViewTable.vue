@@ -48,26 +48,25 @@ export default {
   },
   watch: {
     tablename() {
-      this.Select();
+      this.ReadTableData();
     },
   },
   mounted() {
-    this.Select();
-    this.$Bus.$on('row-edit', (e) => {
-      console.log(e);
-    });
+    this.ReadTableData();
+    this.$Bus.$on('row-edit', this.Edit);
+    this.$Bus.$on('row-copy', this.Copy);
   },
   methods: {
     handleSizeChange(val) {
       this.pageSize = val;
       this.pageIndex = 1;
-      this.Select();
+      this.ReadTableData();
     },
     handleCurrentChange(val) {
       this.pageIndex = val;
-      this.Select();
+      this.ReadTableData();
     },
-    Select() {
+    ReadTableData() {
       if (!this.tablename || this.loading) return;
       this.loading = true;
       const params = {
@@ -83,6 +82,30 @@ export default {
         this.tableData = res.list;
       });
     },
+    Copy(index) {
+      this.$Sendmsg2main('copy', JSON.stringify(this.tableData[index]));
+    },
+    Edit(index) {
+      let sql = '';
+      Object.keys(this.tableData[index]).forEach((key) => {
+        const val = this.tableData[index][key];
+        if (typeof val === 'number') sql = `${sql},${key}=${val}\n`;
+        else if (val.length <= 50) sql = `${sql},${key}='${val}'\n`;
+        else sql = `${sql},${key}='${val.substr(0, 50)}...'\n`;
+      });
+      sql = `UPDATE ${this.tablename} ${sql.substr(1)} WHERE `;
+      console.log('443344', sql);
+
+      document.querySelector('.nav-top').children[2].click();
+      this.$nextTick(() => {
+        this.$Bus.$emit('new-sql', { title: `编辑${this.tablename}`, sql });
+      });
+      // this.$Sendmsg2main('copy', JSON.stringify(this.tableData[index]));
+    },
+  },
+  beforeDestroy() {
+    this.$Bus.$off('row-edit', this.Edit);
+    this.$Bus.$off('row-copy', this.Copy);
   },
 };
 </script>

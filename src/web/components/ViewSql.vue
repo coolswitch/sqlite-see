@@ -1,5 +1,19 @@
 <template>
   <div class="sql-warp">
+    <ul class="sqltab-box">
+      <li class="addtab" @click="AddTab()">
+        <i class="el-icon el-icon-plus"></i>
+      </li>
+      <li
+        v-for="(tab, i) in sqlTabs"
+        :key="i"
+        :class="{ active: i === activeIndex }"
+        @click.self="SwitchTab(i)"
+      >
+        {{ tab.title }}
+        <i class="el-icon el-icon-close" @click.self="DelTab(i)"></i>
+      </li>
+    </ul>
     <div class="textarea-box" ref="txtbox">
       <textarea
         ref="sql"
@@ -43,20 +57,20 @@
 </template>
 
 <script>
-import { FindNotes } from "../utils/index";
+import { FindNotes } from '../utils/index';
 
 export default {
-  name: "ViewSql",
+  name: 'ViewSql',
   data() {
     return {
-      sql: "",
-      txt: "",
-      txtHeight: "100%",
+      sql: '',
+      txt: '',
+      txtHeight: '100%',
       lineCount: 1,
       lineNotes: [], // 注释样式行
       resultData: [],
 
-      debouncing: false
+      activeIndex: -1,
     };
   },
   computed: {
@@ -72,7 +86,10 @@ export default {
       } else {
         return [];
       }
-    }
+    },
+    sqlTabs() {
+      return this.$store.state.sqlTabs;
+    },
   },
   methods: {
     Keyup(e) {
@@ -80,7 +97,7 @@ export default {
       const $txt = this.$refs.sql;
       const oldheight = this.txtHeight;
 
-      const lines = this.txt.split("\n");
+      const lines = this.txt.split('\n');
       const height = lines.length * 25;
       if (height > $box.clientHeight) this.txtHeight = `${height}px`;
       else this.txtHeight = `100%`;
@@ -96,30 +113,30 @@ export default {
         this.$nextTick(
           () =>
             ($box.scrollTop =
-              $box.scrollTop + parseInt(this.txtHeight) - parseInt(oldheight))
+              $box.scrollTop + parseInt(this.txtHeight) - parseInt(oldheight)),
         );
       }
     },
     InsertSql(type) {
-      let sqlstr = "";
+      let sqlstr = '';
       switch (type) {
-        case "insert":
+        case 'insert':
           sqlstr = `INSERT INTO ${this.tablename} (${this.fields.join(
-            ","
+            ',',
           )}) \nVALUES ('${this.fields.join("','")}')`;
           break;
-        case "update":
+        case 'update':
           sqlstr = `UPDATE ${this.tablename} \nSET ${this.fields.join(
-            '="",\n'
+            '="",\n',
           )}="" WHERE `;
           break;
-        case "delete":
+        case 'delete':
           sqlstr = `DELETE FROM ${this.tablename} \nWHERE ${this.fields.join(
-            '="" AND \n'
+            '="" AND \n',
           )}=""`;
           break;
         default:
-          sqlstr = `SELECT ${this.fields.join(",")} \nFROM ${
+          sqlstr = `SELECT ${this.fields.join(',')} \nFROM ${
             this.tablename
           } \nWHERE \nORDER BY \nLIMIT `;
           break;
@@ -130,21 +147,62 @@ export default {
     Exec() {
       const sql = FindNotes(this.txt).sql;
       if (!sql) return;
-      console.log("[sql-exec]>", sql);
-      this.$Sendmsg2main("sql-exec", sql).then(res => {
-        console.log("[sql-exec]<", res);
+      console.log('[sql-exec]>', sql);
+      this.$Sendmsg2main('sql-exec', sql).then((res) => {
+        console.log('[sql-exec]<', res);
         this.resultData = res;
       });
-    }
+      // 保存当前tab内容
+      this.sqlTabs[this.activeIndex].sql = this.txt;
+      this.$store.commit('setSqlTabs', this.sqlTabs);
+    },
+    SwitchTab(index) {
+      if (this.activeIndex !== -1 && this.activeIndex < this.sqlTabs.length) {
+        // 保存当前tab内容
+        this.sqlTabs[this.activeIndex].sql = this.txt;
+        this.$store.commit('setSqlTabs', this.sqlTabs);
+      }
+      this.activeIndex = index;
+      this.txt = this.sqlTabs[index].sql;
+      this.Keyup();
+    },
+    DelTab(index) {
+      if (this.sqlTabs.length === 1) {
+        // 只剩一个tab，清空内容
+        this.sqlTabs[0].title = 'sql 1';
+        this.sqlTabs[0].sql = '';
+        this.txt = '';
+      } else {
+        // 删除并激活前面一个tag
+        this.sqlTabs.splice(index, 1);
+        this.$store.commit('setSqlTabs', this.sqlTabs);
+        this.$nextTick(() => {
+          if (this.activeIndex === index) this.SwitchTab(index ? index - 1 : 0);
+          if (this.activeIndex > index) this.activeIndex -= 1;
+        });
+      }
+    },
+    AddTab(sqlobj) {
+      sqlobj = sqlobj || {
+        title: `sql ${this.sqlTabs.length + 1}`,
+        sql: '',
+      };
+      this.$store.commit('setSqlTabs', sqlobj);
+      this.SwitchTab(this.sqlTabs.length - 1);
+    },
   },
   mounted() {
+    this.$store.commit('getSqlTabs');
+    this.SwitchTab(0);
+    this.$Bus.$on('new-sql', this.AddTab);
     // this.$refs.sql.addEventListener('cut', this.Keyup)
     // this.$refs.sql.addEventListener('paste', this.Keyup)
   },
   beforeDestroy() {
+    this.$Bus.$off('new-sql', this.AddTab);
     // this.$refs.sql.removeEventListener('cut', this.Keyup)
     // this.$refs.sql.removeEventListener('paste', this.Keyup)
-  }
+  },
 };
 </script>
 
@@ -155,7 +213,7 @@ export default {
   height: 100%;
 }
 .textarea-box {
-  min-height: 100px;
+  min-height: 200px;
   max-height: 80vh;
   padding: 0 20px 0 40px;
   box-sizing: border-box;
@@ -173,6 +231,8 @@ textarea {
   font-family: none;
   border: none;
   background: transparent;
+  overflow-x: scroll;
+  white-space: nowrap;
 }
 .LineNO {
   position: absolute;
@@ -215,6 +275,58 @@ textarea {
   background: #f5f5f5;
   flex-grow: 99;
   overflow: auto;
+}
+
+.sqltab-box {
+  border-bottom: 1px solid #ccc;
+  overflow: auto;
+  white-space: pre;
+  height: 31px;
+  padding-left: 30px;
+}
+.sqltab-box::-webkit-scrollbar {
+  width: 2px;
+  height: 2px;
+  background-color: transparent;
+}
+.sqltab-box::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+.sqltab-box::-webkit-scrollbar-thumb {
+  background: transparent;
+}
+.sqltab-box:hover::-webkit-scrollbar-thumb {
+  background: rgb(0, 0, 0, 0.2);
+}
+.sqltab-box li {
+  height: 30px;
+  line-height: 30px;
+  padding: 0 10px 0 14px;
+  display: inline-block;
+  cursor: pointer;
+}
+.sqltab-box li.active {
+  background: azure;
+}
+.sqltab-box li i {
+  color: #888;
+  padding-left: 10px;
+  visibility: hidden;
+}
+.sqltab-box li.active i,
+.sqltab-box li:hover i {
+  visibility: visible;
+}
+.sqltab-box .addtab {
+  padding: 0;
+  background: azure;
+  border-right: 1px solid #ccc;
+  position: absolute;
+  left: 0;
+}
+.sqltab-box .addtab i {
+  visibility: visible;
+  padding: 0 6.5px;
 }
 </style>
 <style>

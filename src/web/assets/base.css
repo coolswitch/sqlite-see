@@ -24,14 +24,18 @@
   
   button {
       padding: 0px 10px;
-      background: #46c3f3;
+      background: linear-gradient(
+        -70deg,
+        #64cff9,
+        #37bff3
+      );
       border-radius: 30px;
       line-height: 26px;
       color: #fff;
       cursor: pointer;
       transition: color .3s;
   }
-  button:hover { background: #60d3ff; }
+  button:hover { opacity: .8; }
   button:active { color: #666; }
   
   .fl {
@@ -93,7 +97,8 @@ height: 1px;
 }
 .btn-prev, .btn-next {
   padding: 0 6px !important;
-  margin: 0 3px !important;
+  margin: 3px 0 0 6px !important;
+  height: 22px !important;
 }
 
 

@@ -25,9 +25,9 @@ npm run lint
 See [Configuration Reference](https://cli.vuejs.org/config/).
 
 
-[-] 修改数据
-[-] muti sql
-[-] components alive
+[] muti sql 100%
+[] 修改数据 100%
+[] 
 
 
 

@@ -12,6 +12,7 @@ const store = new Vuex.Store({
       fields: '',
     },
     tableList: [],
+    sqlTabs: [{ title: 'sql 1', sql: '' }],
   },
   mutations: {
     setActiveTable(state, table) {
@@ -19,6 +20,19 @@ const store = new Vuex.Store({
     },
     setTableList(state, table) {
       state.tableList = table;
+    },
+    getSqlTabs(state) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      state.sqlTabs = JSON.parse(localStorage.getItem('sql-tabs')!);
+    },
+    setSqlTabs(state, sqlobj) {
+      if (Array.isArray(sqlobj)) {
+        state.sqlTabs = sqlobj;
+      } else {
+        state.sqlTabs.push(sqlobj);
+      }
+
+      localStorage.setItem('sql-tabs', JSON.stringify(state.sqlTabs));
     },
   },
   actions: {

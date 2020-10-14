@@ -16,7 +16,9 @@
         class="main"
         :class="{ empty: acitveComp === '' || activeTable === '' }"
       >
-        <component :is="acitveComp" v-if="activeTable"></component>
+        <keep-alive
+          ><component :is="acitveComp" v-if="activeTable"></component
+        ></keep-alive>
       </div>
     </div>
   </div>
