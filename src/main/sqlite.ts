@@ -36,7 +36,7 @@ class DBO {
       table = table.dataValues;
       if (table.name.indexOf('sqlite_autoindex') <= -1) {
         table.fields = table.sql.replace(/.*\((.*)\).*/, '$1').split(',');
-        table.fields = table.fields.map((f: string) => f.match(/(\S+)/g)?.[0]);
+        table.fields = table.fields.map((f: string) => f.match(/(\S+)/g)![0]);
         this.tables.push(table as DBTable);
       }
     });
