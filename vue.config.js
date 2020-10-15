@@ -8,6 +8,7 @@ module.exports = {
   pluginOptions: {
     electronBuilder: {
       mainProcessFile: 'src/main/background.ts', // Previously background.js
+      outputDir: 'app',
     },
     // Use this to change the entrypoint of your app's main process
     // mainProcessFile: './src/main/background.ts',

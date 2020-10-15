@@ -5,13 +5,13 @@ module.exports = {
   productName: 'SqliteSee',
   // artifactName: 'SqliteSee',
   appId: 'com.gitee.claudia',
-  files: ['dist_electron/bundled/*', 'package.json'],
+  // files: ['bundled/*'],
   mac: {
-    target: ['dmg'],
+    target: [], // 'dmg'
     icon: 'public/icons/128x128.icns',
   },
   directories: {
-    output: 'dist_electron/release',
+    output: 'release',
   },
   npmRebuild: false,
 };

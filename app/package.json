@@ -1,0 +1,10 @@
+{
+  "name": "sqlite-see",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./bundled/background.js",
+  "dependencies": {
+    "sequelize": "^6.3.5",
+    "sqlite3": "^4.2.0" 
+  } 
+}
