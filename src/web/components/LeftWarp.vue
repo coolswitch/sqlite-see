@@ -7,11 +7,11 @@
         <p
           v-for="item in database"
           :key="item.dir"
-          :title="item.dir"
+          :title="item.path"
           :class="{ active: item.dir == dbdir }"
           @click="OpenDB(item.dir)"
         >
-          {{ item.name }}
+          {{ item.name }} <em class="dbpath">{{ item.path }}</em>
         </p>
         <p class="add" @click="OpenNewFile">[添加新库]</p>
       </div>
@@ -34,66 +34,75 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapState } from 'vuex';
 
 export default {
-  name: "LeftWarp",
+  name: 'LeftWarp',
   data() {
     return {
       database: [],
       tables: [],
-      dbname: "请选择一个数据库",
-      dbdir: ""
+      dbname: '请选择一个数据库',
+      dbdir: '',
     };
   },
   computed: {
-    ...mapState(["activeTable"])
+    ...mapState(['activeTable']),
   },
   created() {
-    console.log("root?", this.$root);
+    console.log('root?', this.$root);
     this.LoadDBList();
-    const dir = localStorage.getItem("db-dir");
+    const dir = localStorage.getItem('db-dir');
     if (dir) this.OpenDB(dir);
     else this.OpenNewFile();
   },
   methods: {
     OpenDB(dir) {
-      this.$Sendmsg2main("db-structure", dir)
-        .then(tables => {
+      this.$Sendmsg2main('db-structure', dir)
+        .then((tables) => {
           this.dbdir = dir;
           this.dbname = dir.match(/\/([^\\/]*)\.sqlite/)[1];
           this.tables = tables;
-          // this.$store.commit("setTableList", tables);
+          this.$store.commit('setActiveDB', dir);
+          this.switchTable(undefined);
         })
-        .catch(err => {
+        .catch((err) => {
+          if (err.message.includes('数据库连接失败')) {
+            err.message = '数据库连接失败';
+            this.database = this.database.filter((t) => t.dir !== dir);
+            this.$store.commit('setActiveDB', '');
+            this.switchTable(undefined);
+          }
           this.$message.error(err.message);
         });
     },
     LoadDBList() {
-      let dblist = localStorage.getItem("db-list");
-      dblist = dblist ? dblist.substr(1).split(",") : [];
-      this.database = dblist.map(db => {
-        return { name: db.match(/\/([^\\/]*)\.sqlite/)[1], dir: db };
+      let dblist = localStorage.getItem('db-list');
+      dblist = dblist ? dblist.substr(1).split(',') : [];
+      this.database = dblist.map((db) => {
+        const name = db.match(/\/([^\\/]*)\.sqlite/)[1],
+          path = db.replace(`/${name}.sqlite`, '').replace(`/Users`, '');
+        return { name, path, dir: db };
       });
     },
     OpenNewFile() {
-      this.$Sendmsg2main("open-dbfile").then(dbfiles => {
+      this.$Sendmsg2main('open-dbfile').then((dbfiles) => {
         if (dbfiles && dbfiles.length) {
-          localStorage.setItem("db-dir", dbfiles[0]);
+          localStorage.setItem('db-dir', dbfiles[0]);
           this.OpenDB(dbfiles[0]);
 
           // 更新数据库列表、并重新加载
-          let dblist = localStorage.getItem("db-list");
-          dblist = dblist ? dblist.replace(`,${dbfiles[0]}`, "") : "";
-          localStorage.setItem("db-list", `${dblist},${dbfiles[0]}`);
+          let dblist = localStorage.getItem('db-list');
+          dblist = dblist ? dblist.replace(`,${dbfiles[0]}`, '') : '';
+          localStorage.setItem('db-list', `${dblist},${dbfiles[0]}`);
           this.LoadDBList();
         }
       });
     },
     switchTable(item) {
-      this.$store.commit("setActiveTable", item);
-    }
-  }
+      this.$store.commit('setActiveTable', item);
+    },
+  },
 };
 </script>
 
@@ -155,7 +164,7 @@ li.title {
   display: block;
 }
 .database-warp::before {
-  content: " ";
+  content: ' ';
   position: absolute;
   width: 100%;
   height: 10px;
@@ -186,7 +195,21 @@ li.title {
   padding-left: 10px;
 }
 .dblist p.active:before {
-  content: "✔";
+  content: '✔';
   margin-right: 6px;
+}
+.dbpath {
+  font-style: normal;
+  font-size: 12px;
+  color: #999;
+  display: block;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  line-height: 12px;
+  padding-bottom: 10px;
+}
+.dblist p.active .dbpath {
+  padding-left: 20px;
 }
 </style>

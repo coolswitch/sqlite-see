@@ -15,7 +15,7 @@ Vue.config.productionTip = false;
 Vue.component(Table.name, Table);
 Vue.component(TableColumn.name, TableColumn);
 Vue.component(Pagination.name, Pagination);
-Vue.component(Message.name, Message);
+Vue.prototype.$message = Message;
 Vue.prototype.$Sendmsg2main = SendMsgToMain;
 Vue.prototype.$Bus = new Vue();
 

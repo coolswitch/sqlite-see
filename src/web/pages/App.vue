@@ -14,10 +14,10 @@
       </div>
       <div
         class="main"
-        :class="{ empty: acitveComp === '' || activeTable === '' }"
+        :class="{ empty: acitveComp === '' || activeDB === '' }"
       >
         <keep-alive
-          ><component :is="acitveComp" v-if="activeTable"></component
+          ><component :is="acitveComp" v-if="activeDB"></component
         ></keep-alive>
       </div>
     </div>
@@ -48,8 +48,8 @@ export default class App extends Vue {
 
   acitveComp = 'ViewTable';
 
-  activeTable() {
-    return this.$store.state.activeTable.name;
+  get activeDB() {
+    return this.$store.state.activeDB;
   }
 }
 </script>

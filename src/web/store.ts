@@ -6,24 +6,24 @@ Vue.use(Vuex);
 
 const store = new Vuex.Store({
   state: {
+    activeDB: '',
     activeTable: {
       name: '',
       sql: '',
       fields: '',
     },
-    tableList: [],
     sqlTabs: [{ title: 'sql 1', sql: '' }],
   },
   mutations: {
-    setActiveTable(state, table) {
-      state.activeTable = table;
+    setActiveDB(state, dir) {
+      state.activeDB = dir;
     },
-    setTableList(state, table) {
-      state.tableList = table;
+    setActiveTable(state, table) {
+      state.activeTable = table || { name: '', sql: '', fields: '' };
     },
     getSqlTabs(state) {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      state.sqlTabs = JSON.parse(localStorage.getItem('sql-tabs')!);
+      const str = localStorage.getItem('sql-tabs');
+      state.sqlTabs = str ? JSON.parse(str) : [{ title: 'sql 1', sql: '' }];
     },
     setSqlTabs(state, sqlobj) {
       if (Array.isArray(sqlobj)) {

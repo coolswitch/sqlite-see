@@ -25,10 +25,13 @@ npm run lint
 See [Configuration Reference](https://cli.vuejs.org/config/).
 
 
-[] muti sql 100%
-[] 修改数据 100%
-[] 优化包大小，现在 500m 100%
-
++ 没有默认sql tag
++ 数据库名加路径
++ sqltag自动聚焦
++ 主进程崩溃处理
+  错误日志
+- 加拖拽打开、右键打开
+- 增删查改变为右键
 
 
 /** 颜色 #xxx 2 rgb(x,x,x) */

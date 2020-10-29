@@ -16,6 +16,7 @@
     </ul>
     <div class="textarea-box" ref="txtbox">
       <textarea
+        tabindex="1"
         ref="sql"
         v-model="txt"
         @keyup="Keyup"

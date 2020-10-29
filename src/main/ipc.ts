@@ -1,13 +1,20 @@
 import DBO from './sqlite';
 import { ipcMain, dialog, clipboard } from 'electron'; //IpcMainEvent
 import { MessageChannel } from '../typings/channel';
+import Log from './Log';
+
+const log = new Log();
 
 function addListener<T extends keyof MessageChannel>(
   cmd: string,
   handler: MessageChannel[T],
 ): void {
   ipcMain.handle(cmd, function(e: Event, data: any) {
-    return handler(data);
+    try {
+      return handler(data);
+    } catch (e) {
+      log.error(`IPC [${cmd}]`, e);
+    }
   });
 }
 
