@@ -21,6 +21,7 @@
         <li class="title">表</li>
         <!-- <li class="empty"></li> -->
         <li
+          class="table-name"
           v-for="item in tables"
           :key="item.name"
           :class="{ active: activeTable.name === item.name }"
@@ -63,14 +64,15 @@ export default {
           this.dbdir = dir;
           this.dbname = dir.match(/\/([^\\/]*)\.sqlite/)[1];
           this.tables = tables;
-          this.$store.commit('setActiveDB', dir);
+          this.$store.commit('setActiveDB', { dir, tables });
           this.switchTable(undefined);
+          localStorage.setItem('db-dir', dir);
         })
         .catch((err) => {
           if (err.message.includes('数据库连接失败')) {
             err.message = '数据库连接失败';
             this.database = this.database.filter((t) => t.dir !== dir);
-            this.$store.commit('setActiveDB', '');
+            this.$store.commit('setActiveDB', null);
             this.switchTable(undefined);
           }
           this.$message.error(err.message);

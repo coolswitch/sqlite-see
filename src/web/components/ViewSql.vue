@@ -33,10 +33,6 @@
     <!-- <div class="textarea" ref="sql" @keyup="Keyup" contenteditable="plaintext-only"></div> -->
     <div class="btn-box">
       <button class="fl ml-20" @click="Exec">执行（crtl + F5）</button>
-      <button class="fr mr-20" @click="InsertSql('insert')">插</button>
-      <button class="fr mr-20" @click="InsertSql('delete')">删</button>
-      <button class="fr mr-20" @click="InsertSql('update')">更</button>
-      <button class="fr mr-20" @click="InsertSql('select')">查</button>
     </div>
     <div class="result-box">
       <el-table
@@ -75,11 +71,8 @@ export default {
     };
   },
   computed: {
-    tablename() {
-      return this.$store.state.activeTable.name;
-    },
-    fields() {
-      return this.$store.state.activeTable.fields;
+    tables() {
+      return this.$store.state.activeDB.tables;
     },
     resultFields() {
       if (this.resultData.length) {
@@ -117,33 +110,6 @@ export default {
               $box.scrollTop + parseInt(this.txtHeight) - parseInt(oldheight)),
         );
       }
-    },
-    InsertSql(type) {
-      let sqlstr = '';
-      switch (type) {
-        case 'insert':
-          sqlstr = `INSERT INTO ${this.tablename} (${this.fields.join(
-            ',',
-          )}) \nVALUES ('${this.fields.join("','")}')`;
-          break;
-        case 'update':
-          sqlstr = `UPDATE ${this.tablename} \nSET ${this.fields.join(
-            '="",\n',
-          )}="" WHERE `;
-          break;
-        case 'delete':
-          sqlstr = `DELETE FROM ${this.tablename} \nWHERE ${this.fields.join(
-            '="" AND \n',
-          )}=""`;
-          break;
-        default:
-          sqlstr = `SELECT ${this.fields.join(',')} \nFROM ${
-            this.tablename
-          } \nWHERE \nORDER BY \nLIMIT `;
-          break;
-      }
-      this.txt = `${this.txt}\n${sqlstr}`;
-      this.Keyup();
     },
     Exec() {
       const sql = FindNotes(this.txt).sql;
@@ -191,16 +157,54 @@ export default {
       this.$store.commit('setSqlTabs', sqlobj);
       this.SwitchTab(this.sqlTabs.length - 1);
     },
+    // 右键快捷操作
+    AppendSqlS(tablename) {
+      const fields = this.tables.find((item) => item.name === tablename).fields;
+      console.log(fields);
+      const sqlstr = `SELECT ${fields.join(',')} \nFROM ${tablename}`;
+      this.txt = `${this.txt}\n${sqlstr} \nWHERE \nORDER BY \nLIMIT `;
+      this.Keyup();
+    },
+    AppendSqlU(tablename) {
+      const fields = this.tables.find((item) => item.name === tablename).fields;
+      const sqlstr = `UPDATE ${tablename} \nSET ${fields.join('="",\n')}=""`;
+      this.txt = `${this.txt}\n${sqlstr} \nWHERE `;
+      this.Keyup();
+    },
+    AppendSqlI(tablename) {
+      const fields = this.tables.find((item) => item.name === tablename).fields;
+      const sqlstr = `INSERT INTO ${tablename} (${fields.join(
+        ',',
+      )}) \nVALUES ('${fields.join("','")}')`;
+      this.txt = `${this.txt}\n${sqlstr} `;
+      this.Keyup();
+    },
+    AppendSqlD(tablename) {
+      const fields = this.tables.find((item) => item.name === tablename).fields;
+      const sqlstr = `DELETE FROM ${tablename} \nWHERE ${fields.join(
+        '="" AND \n',
+      )}=""`;
+      this.txt = `${this.txt}\n${sqlstr} `;
+      this.Keyup();
+    },
   },
   mounted() {
     this.$store.commit('getSqlTabs');
     this.SwitchTab(0);
     this.$Bus.$on('new-sql', this.AddTab);
+    this.$Bus.$on('table-select', this.AppendSqlS);
+    this.$Bus.$on('table-update', this.AppendSqlU);
+    this.$Bus.$on('table-insert', this.AppendSqlI);
+    this.$Bus.$on('table-delete', this.AppendSqlD);
     // this.$refs.sql.addEventListener('cut', this.Keyup)
     // this.$refs.sql.addEventListener('paste', this.Keyup)
   },
   beforeDestroy() {
     this.$Bus.$off('new-sql', this.AddTab);
+    this.$Bus.$off('table-select', this.AppendSqlS);
+    this.$Bus.$off('table-update', this.AppendSqlU);
+    this.$Bus.$off('table-insert', this.AppendSqlI);
+    this.$Bus.$off('table-delete', this.AppendSqlD);
     // this.$refs.sql.removeEventListener('cut', this.Keyup)
     // this.$refs.sql.removeEventListener('paste', this.Keyup)
   },
@@ -263,7 +267,7 @@ textarea {
 .btn-box {
   height: 40px;
   background: #eee;
-  padding-top: 7px;
+  padding: 7px 0;
 }
 .ml-20 {
   margin-left: 20px;
@@ -283,6 +287,8 @@ textarea {
   overflow: auto;
   white-space: pre;
   height: 31px;
+  min-height: 31px;
+  max-height: 31px;
   padding-left: 30px;
 }
 .sqltab-box::-webkit-scrollbar {

@@ -49,7 +49,7 @@ export default class App extends Vue {
   acitveComp = 'ViewTable';
 
   get activeDB() {
-    return this.$store.state.activeDB;
+    return this.$store.state.activeDB.dir;
   }
 }
 </script>

@@ -14,6 +14,8 @@ export class Contextmenu {
   private busEvent: (cmd: string) => Function;
   private busEventParams: unknown;
 
+  menuRow: TypeMenu;
+
   menuTable: TypeMenu;
 
   constructor($Bus: Vue) {
@@ -23,18 +25,30 @@ export class Contextmenu {
     };
     document.addEventListener('contextmenu', this.Listener.bind(this));
 
-    this.menuTable = this.CreateMenu([
+    this.menuRow = this.CreateMenu([
       { label: '编辑行', id: 'row-edit' } as TypeMenuItem,
       { label: '复制整行', id: 'row-copy' } as TypeMenuItem,
+    ]);
+    this.menuTable = this.CreateMenu([
+      { label: 'SELECT', id: 'table-select' } as TypeMenuItem,
+      { label: 'UPDATE', id: 'table-update' } as TypeMenuItem,
+      { label: 'INSERT', id: 'table-insert' } as TypeMenuItem,
+      { label: 'DELETE', id: 'table-delete' } as TypeMenuItem,
     ]);
   }
 
   Listener(e: PlainObject) {
-    // 数据右键菜单
+    // 数据 右键菜单
     if (e.target.className === 'cell') {
       e.preventDefault();
       this.busEventParams = e.path[2].rowIndex;
       // console.log("----", e.path[2], e.path[2].rowIndex);
+      this.menuRow.popup();
+    }
+    // 表名列表 右键菜单
+    if (e.target.className === 'table-name') {
+      e.preventDefault();
+      this.busEventParams = e.target.innerText;
       this.menuTable.popup();
     }
   }

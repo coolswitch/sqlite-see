@@ -6,17 +6,21 @@ Vue.use(Vuex);
 
 const store = new Vuex.Store({
   state: {
-    activeDB: '',
+    activeDB: {
+      dir: '',
+      tables: [],
+    },
     activeTable: {
       name: '',
       sql: '',
       fields: '',
     },
+    allTables: [],
     sqlTabs: [{ title: 'sql 1', sql: '' }],
   },
   mutations: {
-    setActiveDB(state, dir) {
-      state.activeDB = dir;
+    setActiveDB(state, db) {
+      state.activeDB = db || { dir: '', tables: [] };
     },
     setActiveTable(state, table) {
       state.activeTable = table || { name: '', sql: '', fields: '' };

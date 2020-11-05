@@ -48,7 +48,7 @@ export default function initListener() {
     if (sql.match(/select/i) && !sql.match(/limit/i))
       sql = `${sql} limit 0, 50`;
     const list = await dbo!.exec(sql);
-    console.log('FFFFFF', list);
+    // console.log('FFFFFF', list);
     return list[0];
   });
 
