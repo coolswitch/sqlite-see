@@ -28,6 +28,7 @@ export class Contextmenu {
     this.menuRow = this.CreateMenu([
       { label: '编辑行', id: 'row-edit' } as TypeMenuItem,
       { label: '复制整行', id: 'row-copy' } as TypeMenuItem,
+      { label: '删除记录', id: 'row-del' } as TypeMenuItem,
     ]);
     this.menuTable = this.CreateMenu([
       { label: 'SELECT', id: 'table-select' } as TypeMenuItem,
@@ -46,7 +47,7 @@ export class Contextmenu {
       this.menuRow.popup();
     }
     // 表名列表 右键菜单
-    if (e.target.className === 'table-name') {
+    if (e.target.className.includes('table-name')) {
       e.preventDefault();
       this.busEventParams = e.target.innerText;
       this.menuTable.popup();

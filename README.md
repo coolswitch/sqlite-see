@@ -30,9 +30,15 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 + sqltag自动聚焦
 + 主进程崩溃处理
   错误日志
-- 加拖拽打开、右键打开
-- 增删查改变为右键
++ 增删查改变为右键
 
++ 删除记录
++ 当前是哪个库太不明显
++ 增删查改加结果反馈，执行失败错误反馈，执行时长
++ 添加刷新按钮，表、结果
+
+- 批量删除
+- 加拖拽打开、右键打开
 
 /** 颜色 #xxx 2 rgb(x,x,x) */
 export function colorHTX2RGB(hexStr: string): Array<number> {

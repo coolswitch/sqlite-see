@@ -11,7 +11,7 @@
     "postinstall": "electron-builder install-app-deps",
     "postuninstall": "electron-builder install-app-deps"
   },
-  "main": "./bundled/background.js",
+  "main": "./dist_electron/bundled/background.js",
   "dependencies": {
     "aws-sdk": "^2.747.0",
     "core-js": "^3.6.5",

@@ -47,9 +47,13 @@ export default function initListener() {
   addListener('sql-exec', async (sql: string) => {
     if (sql.match(/select/i) && !sql.match(/limit/i))
       sql = `${sql} limit 0, 50`;
-    const list = await dbo!.exec(sql);
-    // console.log('FFFFFF', list);
-    return list[0];
+    try {
+      const list = await dbo!.exec(sql);
+      console.log('FFFFFF', list);
+      return sql.match(/select/i) ? list : list[1];
+    } catch (e) {
+      return e.message;
+    }
   });
 
   // 打开文件

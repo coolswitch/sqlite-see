@@ -18,7 +18,9 @@
     </div>
     <div class="tables-warp">
       <ul>
-        <li class="title">表</li>
+        <li class="title">
+          {{ dbdir }}<em class="dir" @click="Refresh">刷新</em>
+        </li>
         <!-- <li class="empty"></li> -->
         <li
           class="table-name"
@@ -104,6 +106,15 @@ export default {
     switchTable(item) {
       this.$store.commit('setActiveTable', item);
     },
+    Refresh() {
+      const activeTable = this.activeTable;
+      this.switchTable(undefined);
+      this.$Sendmsg2main('db-structure', this.dbdir).then((tables) => {
+        this.tables = tables;
+        this.$store.commit('setActiveDB', { dir: this.dbdir, tables });
+        this.switchTable(activeTable);
+      });
+    },
   },
 };
 </script>
@@ -145,6 +156,11 @@ li.title {
   margin-bottom: 10px;
   border-top: 1px solid rgba(70, 195, 243, 0.1);
   border-bottom: 1px solid rgba(70, 195, 243, 0.1);
+  position: relative;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  padding-right: 50px;
 }
 
 .database-warp {
@@ -213,5 +229,20 @@ li.title {
 }
 .dblist p.active .dbpath {
   padding-left: 20px;
+}
+.dir {
+  display: inline-block;
+  position: absolute;
+  right: 0px;
+  top: 0;
+  padding: 5px 10px 5px 15px;
+  color: #ccc;
+  font-size: 12px;
+  line-height: 25px;
+  cursor: pointer;
+}
+.dir:hover {
+  color: #999;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.1), #ffffff);
 }
 </style>

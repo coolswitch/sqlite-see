@@ -33,8 +33,10 @@
     <!-- <div class="textarea" ref="sql" @keyup="Keyup" contenteditable="plaintext-only"></div> -->
     <div class="btn-box">
       <button class="fl ml-20" @click="Exec">执行（crtl + F5）</button>
+      <span class="usedtime">用时：{{ usedTime / 1000 }} s</span>
     </div>
-    <div class="result-box">
+    <div class="result-box err" v-if="errorMsg">{{ errorMsg }}</div>
+    <div class="result-box" v-else>
       <el-table
         size="mini"
         height="100%"
@@ -66,8 +68,10 @@ export default {
       lineCount: 1,
       lineNotes: [], // 注释样式行
       resultData: [],
+      errorMsg: '',
 
       activeIndex: -1,
+      usedTime: 0,
     };
   },
   computed: {
@@ -113,11 +117,19 @@ export default {
     },
     Exec() {
       const sql = FindNotes(this.txt).sql;
+      const time = new Date().getTime();
       if (!sql) return;
+      this.errorMsg = '';
       console.log('[sql-exec]>', sql);
       this.$Sendmsg2main('sql-exec', sql).then((res) => {
         console.log('[sql-exec]<', res);
-        this.resultData = res;
+        this.usedTime = new Date().getTime() - time;
+
+        if (typeof res === 'string')
+          this.errorMsg = `(${new Date().toLocaleTimeString()}) ${res}`;
+        else if (typeof res === 'number')
+          this.resultData = [{ 'effect-line-number': res }];
+        else this.resultData = res;
       });
       // 保存当前tab内容
       this.sqlTabs[this.activeIndex].sql = this.txt;
@@ -334,6 +346,16 @@ textarea {
 .sqltab-box .addtab i {
   visibility: visible;
   padding: 0 6.5px;
+}
+.err {
+  color: red;
+  padding: 30px 50px;
+}
+.usedtime {
+  display: inline-block;
+  float: right;
+  color: #bbb;
+  padding-right: 20px;
 }
 </style>
 <style>

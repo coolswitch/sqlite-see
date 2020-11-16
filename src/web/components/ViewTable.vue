@@ -55,6 +55,7 @@ export default {
     this.ReadTableData();
     this.$Bus.$on('row-edit', this.Edit);
     this.$Bus.$on('row-copy', this.Copy);
+    this.$Bus.$on('row-del', this.Del);
   },
   methods: {
     handleSizeChange(val) {
@@ -102,10 +103,27 @@ export default {
       });
       // this.$Sendmsg2main('copy', JSON.stringify(this.tableData[index]));
     },
+    Del(index) {
+      const where = [];
+      Object.keys(this.tableData[index]).forEach((key) => {
+        const val = this.tableData[index][key];
+        if (typeof val === 'number') where.push(` ${key}=${val} `);
+        else if (val === 'null') where.push(` ${key} is null `);
+        else if (val.length <= 100) where.push(` ${key}='${val}' `);
+      });
+      const sql = `DELETE FROM ${this.tablename} \nWHERE ${where.join('AND')}`;
+
+      console.log('[sql-exec]>', sql);
+      this.$Sendmsg2main('sql-exec', sql).then((res) => {
+        console.log('[sql-exec]<', res);
+        this.ReadTableData();
+      });
+    },
   },
   beforeDestroy() {
     this.$Bus.$off('row-edit', this.Edit);
     this.$Bus.$off('row-copy', this.Copy);
+    this.$Bus.$off('row-del', this.Del);
   },
 };
 </script>

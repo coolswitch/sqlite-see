@@ -1,5 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { Sequelize } = require('sequelize');
+const { Sequelize, QueryTypes } = require('sequelize');
 const sqlite3 = require('sqlite3').verbose();
 
 class DBO {
@@ -55,7 +55,7 @@ class DBO {
   async select(sql: string) {
     // try {
     let list = await this.sequelize.query(sql, {
-      type: Sequelize.QueryTypes.SELECT,
+      type: QueryTypes.SELECT,
     });
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
     list = multistageJson2single(list);
@@ -67,7 +67,16 @@ class DBO {
   }
 
   async exec(sql: string) {
-    const res = await this.sequelize.query(sql);
+    const type = sql.match(/select/i)
+      ? QueryTypes.SELECT
+      : sql.match(/UPDATE/i)
+      ? QueryTypes.UPDATE
+      : sql.match(/insert/i)
+      ? QueryTypes.INSERT
+      : sql.match(/DELETE/i)
+      ? QueryTypes.UPDATE
+      : null;
+    const res = await this.sequelize.query(sql, { type });
     return res;
   }
 }

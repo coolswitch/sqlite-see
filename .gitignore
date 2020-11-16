@@ -23,7 +23,5 @@ pnpm-debug.log*
 *.sw?
 
 #Electron-builder output
-/dist_electron
 /release
-/app/bundled
-/app/index.js
+app/*[!.*on]
