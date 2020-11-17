@@ -1,6 +1,6 @@
 {
   "name": "sqlite-see",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "scripts": {
     "vue:serve": "vue-cli-service serve",
@@ -11,7 +11,7 @@
     "postinstall": "electron-builder install-app-deps",
     "postuninstall": "electron-builder install-app-deps"
   },
-  "main": "./dist_electron/bundled/background.js",
+  "main": "./bundled/background.js",
   "dependencies": {
     "aws-sdk": "^2.747.0",
     "core-js": "^3.6.5",

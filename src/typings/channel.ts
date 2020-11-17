@@ -7,3 +7,7 @@ export type MessageChannel = {
   'open-dbfile': () => string[] | undefined;
   copy: (txt: string) => void;
 };
+
+export type NoticeChannel = {
+  'user-open-file': string;
+};

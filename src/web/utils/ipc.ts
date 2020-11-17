@@ -9,6 +9,14 @@ export const SendMsgToMain = (cmd: string, params: unknown) => {
   return ipcRenderer.invoke(cmd, params);
 };
 
+export const ListenerOnMain = (cmd: string): Promise<string> => {
+  return new Promise((resolve) => {
+    ipcRenderer.on(cmd, (e: unknown, message: string) => {
+      resolve(message);
+    });
+  });
+};
+
 /** 初始化右键菜单 */
 export class Contextmenu {
   private busEvent: (cmd: string) => Function;

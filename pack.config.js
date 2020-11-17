@@ -14,4 +14,8 @@ module.exports = {
     output: 'release',
   },
   npmRebuild: false,
+  fileAssociations: {
+    ext: 'sqlite',
+    role: 'Viewer',
+  },
 };

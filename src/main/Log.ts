@@ -91,9 +91,7 @@ export default class Log {
 
   private bufLifeTime = 5000;
 
-  constructor(
-    opt: LogOptions = { dest: LogDest.STDOUT, level: LogLevel.DEBUG },
-  ) {
+  constructor(opt: LogOptions = { dest: LogDest.FILE, level: LogLevel.DEBUG }) {
     this.dest = opt.dest;
     this.level = opt.level;
     this.prefix = opt.prefix || '';

@@ -1,12 +1,12 @@
 import DBO from './sqlite';
 import { ipcMain, dialog, clipboard } from 'electron'; //IpcMainEvent
-import { MessageChannel } from '../typings/channel';
+import { MessageChannel, NoticeChannel } from '../typings/channel';
 import Log from './Log';
 
 const log = new Log();
 
 function addListener<T extends keyof MessageChannel>(
-  cmd: string,
+  cmd: T,
   handler: MessageChannel[T],
 ): void {
   ipcMain.handle(cmd, function(e: Event, data: any) {
@@ -68,4 +68,16 @@ export default function initListener() {
     clipboard.clear();
     clipboard.writeText(txt);
   });
+}
+
+export function SendMsgToRenderer<T extends keyof NoticeChannel>(
+  webContents: Electron.WebContents,
+  cmd: T,
+  params: NoticeChannel[T],
+): void {
+  if (webContents.isLoading())
+    webContents.on('did-finish-load', () => {
+      webContents.send(cmd, params);
+    });
+  else webContents.send(cmd, params);
 }

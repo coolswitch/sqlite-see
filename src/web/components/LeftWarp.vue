@@ -38,6 +38,7 @@
 
 <script>
 import { mapState } from 'vuex';
+import { ListenerOnMain } from '../utils/ipc';
 
 export default {
   name: 'LeftWarp',
@@ -58,6 +59,10 @@ export default {
     const dir = localStorage.getItem('db-dir');
     if (dir) this.OpenDB(dir);
     else this.OpenNewFile();
+
+    ListenerOnMain('user-open-file').then((newfilepath) => {
+      this.OpenDB(newfilepath);
+    });
   },
   methods: {
     OpenDB(dir) {
