@@ -22,8 +22,13 @@ npm run lint
 ```
 
 ### Customize configuration
+
 See [Configuration Reference](https://cli.vuejs.org/config/).
 
+See [sequelize](https://sequelize.org/master/manual/getting-started.html), [more](https://blog.csdn.net/weixin_45632692/article/details/100919595)
+
+
+### Log
 
 + 没有默认sql tag
 + 数据库名加路径
@@ -40,7 +45,6 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 + .sqlite文件，右键打开
 
 - 批量删除
-
 
 
 
