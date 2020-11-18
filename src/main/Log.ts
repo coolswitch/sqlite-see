@@ -92,7 +92,8 @@ export default class Log {
   private bufLifeTime = 5000;
 
   constructor(opt: LogOptions = { dest: LogDest.FILE, level: LogLevel.DEBUG }) {
-    this.dest = opt.dest;
+    this.dest =
+      process.env.NODE_ENV !== 'production' ? LogDest.STDOUT : opt.dest;
     this.level = opt.level;
     this.prefix = opt.prefix || '';
     this.path = opt.path || defaultPath;

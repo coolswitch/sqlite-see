@@ -1,9 +1,26 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { Sequelize, QueryTypes } = require('sequelize');
+import { Sequelize, QueryTypes, DataTypes } from 'sequelize';
 const sqlite3 = require('sqlite3').verbose();
 
+/** 多级json转单级 */
+function multistageJson2single(json: PlainObject): PlainObject {
+  if (Array.isArray(json)) {
+    json.forEach((item) => {
+      for (const key in item) {
+        if (typeof item[key] === 'object')
+          item[key] = JSON.stringify(item[key]);
+      }
+    });
+  } else {
+    for (const key in json) {
+      if (typeof json[key] === 'object') json[key] = JSON.stringify(json[key]);
+    }
+  }
+  return json;
+}
+
 class DBO {
-  private sequelize: any;
+  private sequelize: Sequelize;
 
   tables: DBTable[] = [];
 
@@ -20,8 +37,8 @@ class DBO {
     const __master = this.sequelize.define(
       'sqlite_master',
       {
-        name: Sequelize.STRING(100),
-        sql: Sequelize.TEXT,
+        name: DataTypes.STRING(100),
+        sql: DataTypes.TEXT,
       },
       {
         timestamps: false, // 不要默认时间戳
@@ -36,6 +53,7 @@ class DBO {
       table = table.dataValues;
       if (table.name.indexOf('sqlite_autoindex') <= -1) {
         table.fields = table.sql.replace(/.*\((.*)\).*/, '$1').split(',');
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         table.fields = table.fields.map((f: string) => f.match(/(\S+)/g)![0]);
         this.tables.push(table as DBTable);
       }
@@ -46,56 +64,38 @@ class DBO {
   // RefreshStructure () {
   //   this._initStructure();
   // }
-  //     select * from sqlite_master where type = "table";
 
-  // -- select * from sqlite_master where name = "app"
-
-  // -- select * from sqlite_master where type="table" and name="app";
-
-  async select(sql: string) {
-    // try {
-    let list = await this.sequelize.query(sql, {
-      type: QueryTypes.SELECT,
-    });
-    // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    list = multistageJson2single(list);
-    return list;
-    //   return { list }
-    // } catch (err) {
-    //   return { err }
-    // }
+  async SelectAndCount(
+    tablename: string,
+    index: number,
+    size: number,
+  ): Promise<{ total: number; list: PlainObject[] }> {
+    const list = await this.sequelize.query(
+      `select * from ${tablename} limit ${index * size}, ${size}`,
+      {
+        type: QueryTypes.SELECT,
+      },
+    );
+    const total: { total: number } = await this.sequelize.query(
+      `select count(*) as total from ${tablename}`,
+      {
+        type: QueryTypes.SELECT,
+        plain: true,
+      },
+    );
+    return Object.assign(total, { list });
   }
 
-  async exec(sql: string) {
-    const type = sql.match(/select/i)
+  async Exec(sql: string) {
+    const type: QueryTypes = sql.match(/select/i)
       ? QueryTypes.SELECT
-      : sql.match(/UPDATE/i)
-      ? QueryTypes.UPDATE
       : sql.match(/insert/i)
       ? QueryTypes.INSERT
-      : sql.match(/DELETE/i)
-      ? QueryTypes.UPDATE
-      : null;
-    const res = await this.sequelize.query(sql, { type });
-    return res;
-  }
-}
+      : QueryTypes.UPDATE;
 
-/** 多级json转单级 */
-function multistageJson2single(json: PlainObject) {
-  if (Array.isArray(json)) {
-    json.forEach((item) => {
-      for (const key in item) {
-        if (typeof item[key] === 'object')
-          item[key] = JSON.stringify(item[key]);
-      }
-    });
-  } else {
-    for (const key in json) {
-      if (typeof json[key] === 'object') json[key] = JSON.stringify(json[key]);
-    }
+    const res = await this.sequelize.query(sql, { type });
+    return type === QueryTypes.SELECT ? res : [{ 'effect-row-number': res[1] }];
   }
-  return json;
 }
 
 export default DBO;

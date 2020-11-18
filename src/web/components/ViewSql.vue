@@ -121,16 +121,19 @@ export default {
       if (!sql) return;
       this.errorMsg = '';
       console.log('[sql-exec]>', sql);
-      this.$Sendmsg2main('sql-exec', sql).then((res) => {
-        console.log('[sql-exec]<', res);
-        this.usedTime = new Date().getTime() - time;
-
-        if (typeof res === 'string')
-          this.errorMsg = `(${new Date().toLocaleTimeString()}) ${res}`;
-        else if (typeof res === 'number')
-          this.resultData = [{ 'effect-line-number': res }];
-        else this.resultData = res;
-      });
+      this.$Sendmsg2main('sql-exec', sql).then(
+        (res) => {
+          console.log('[sql-exec]<', res);
+          this.usedTime = new Date().getTime() - time;
+          this.resultData = res;
+        },
+        (err) => {
+          if (err.message.indexOf('SQLITE_ERROR') >= 0) {
+            err.message = `SQLITE_ERROR${err.message.split('SQLITE_ERROR')[1]}`;
+          }
+          this.errorMsg = `(${new Date().toLocaleTimeString()}) ${err.message}`;
+        },
+      );
       // 保存当前tab内容
       this.sqlTabs[this.activeIndex].sql = this.txt;
       this.$store.commit('setSqlTabs', this.sqlTabs);
