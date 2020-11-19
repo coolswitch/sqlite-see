@@ -55,154 +55,165 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { Component, Vue } from 'vue-property-decorator';
 import { FindNotes } from '../utils/index';
 
-export default {
-  name: 'ViewSql',
-  data() {
-    return {
-      sql: '',
-      txt: '',
-      txtHeight: '100%',
-      lineCount: 1,
-      lineNotes: [], // 注释样式行
-      resultData: [],
-      errorMsg: '',
+@Component
+export default class ViewSql extends Vue {
+  sql = '';
+  txt = '';
+  txtHeight = '100%';
+  lineCount = 1;
+  lineNotes: number[] = []; // 注释样式行
+  resultData: PlainObject[] = [];
+  errorMsg = '';
+  activeIndex = -1;
+  usedTime = 0;
 
-      activeIndex: -1,
-      usedTime: 0,
-    };
-  },
-  computed: {
-    tables() {
-      return this.$store.state.activeDB.tables;
-    },
-    resultFields() {
-      if (this.resultData.length) {
-        return Object.keys(this.resultData[0]);
-      } else {
-        return [];
-      }
-    },
-    sqlTabs() {
-      return this.$store.state.sqlTabs;
-    },
-  },
-  methods: {
-    Keyup(e) {
-      const $box = this.$refs.txtbox;
-      const $txt = this.$refs.sql;
-      const oldheight = this.txtHeight;
+  get tables() {
+    return this.$store.state.activeDB.tables;
+  }
+  get resultFields() {
+    if (this.resultData.length) {
+      return Object.keys(this.resultData[0]);
+    } else {
+      return [];
+    }
+  }
+  get sqlTabs() {
+    return this.$store.state.sqlTabs;
+  }
 
-      const lines = this.txt.split('\n');
-      const height = lines.length * 25;
-      if (height > $box.clientHeight) this.txtHeight = `${height}px`;
-      else this.txtHeight = `100%`;
-      this.lineCount = lines.length;
-      this.lineNotes = FindNotes(this.txt).notes;
+  Keyup(e: Event | null = null) {
+    const $box = this.$refs.txtbox as HTMLElement;
+    const $txt = this.$refs.sql as HTMLTextAreaElement;
+    const oldheight = this.txtHeight;
 
-      if (!e) {
-        $txt.setSelectionRange(this.txt.length, this.txt.length);
-        $txt.focus();
-        this.$nextTick(() => ($box.scrollTop = $box.scrollHeight));
-      } else {
-        if (parseInt(oldheight) >= parseInt(this.txtHeight)) return;
-        this.$nextTick(
-          () =>
-            ($box.scrollTop =
-              $box.scrollTop + parseInt(this.txtHeight) - parseInt(oldheight)),
-        );
-      }
-    },
-    Exec() {
-      const sql = FindNotes(this.txt).sql;
-      const time = new Date().getTime();
-      if (!sql) return;
-      this.errorMsg = '';
-      console.log('[sql-exec]>', sql);
-      this.$Sendmsg2main('sql-exec', sql).then(
-        (res) => {
-          console.log('[sql-exec]<', res);
-          this.usedTime = new Date().getTime() - time;
-          this.resultData = res;
-        },
-        (err) => {
-          if (err.message.indexOf('SQLITE_ERROR') >= 0) {
-            err.message = `SQLITE_ERROR${err.message.split('SQLITE_ERROR')[1]}`;
-          }
-          this.errorMsg = `(${new Date().toLocaleTimeString()}) ${err.message}`;
-        },
+    const lines = this.txt.split('\n');
+    const height = lines.length * 25;
+    if (height > $box.clientHeight) this.txtHeight = `${height}px`;
+    else this.txtHeight = `100%`;
+    this.lineCount = lines.length;
+    this.lineNotes = FindNotes(this.txt).notes;
+
+    if (!e) {
+      $txt.setSelectionRange(this.txt.length, this.txt.length);
+      $txt.focus();
+      this.$nextTick(() => ($box.scrollTop = $box.scrollHeight));
+    } else {
+      if (parseInt(oldheight) >= parseInt(this.txtHeight)) return;
+      this.$nextTick(
+        () =>
+          ($box.scrollTop =
+            $box.scrollTop + parseInt(this.txtHeight) - parseInt(oldheight)),
       );
+    }
+  }
+
+  Exec() {
+    const sql = FindNotes(this.txt).sql;
+    const time = new Date().getTime();
+    if (!sql) return;
+    this.errorMsg = '';
+    console.log('[sql-exec]>', sql);
+    this.$Sendmsg2main('sql-exec', sql).then(
+      (res) => {
+        console.log('[sql-exec]<', res);
+        this.usedTime = new Date().getTime() - time;
+        this.resultData = res as PlainObject[];
+      },
+      (err) => {
+        if (err.message.indexOf('SQLITE_ERROR') >= 0) {
+          err.message = `SQLITE_ERROR${err.message.split('SQLITE_ERROR')[1]}`;
+        }
+        this.errorMsg = `(${new Date().toLocaleTimeString()}) ${err.message}`;
+      },
+    );
+    // 保存当前tab内容
+    this.sqlTabs[this.activeIndex].sql = this.txt;
+    this.$store.commit('setSqlTabs', this.sqlTabs);
+  }
+
+  SwitchTab(index: number) {
+    if (this.activeIndex !== -1 && this.activeIndex < this.sqlTabs.length) {
       // 保存当前tab内容
       this.sqlTabs[this.activeIndex].sql = this.txt;
       this.$store.commit('setSqlTabs', this.sqlTabs);
-    },
-    SwitchTab(index) {
-      if (this.activeIndex !== -1 && this.activeIndex < this.sqlTabs.length) {
-        // 保存当前tab内容
-        this.sqlTabs[this.activeIndex].sql = this.txt;
-        this.$store.commit('setSqlTabs', this.sqlTabs);
-      }
-      this.activeIndex = index;
-      this.txt = this.sqlTabs[index].sql;
-      this.Keyup();
-    },
-    DelTab(index) {
-      if (this.sqlTabs.length === 1) {
-        // 只剩一个tab，清空内容
-        this.sqlTabs[0].title = 'sql 1';
-        this.sqlTabs[0].sql = '';
-        this.txt = '';
-      } else {
-        // 删除并激活前面一个tag
-        this.sqlTabs.splice(index, 1);
-        this.$store.commit('setSqlTabs', this.sqlTabs);
-        this.$nextTick(() => {
-          if (this.activeIndex === index) this.SwitchTab(index ? index - 1 : 0);
-          if (this.activeIndex > index) this.activeIndex -= 1;
-        });
-      }
-    },
-    AddTab(sqlobj) {
-      sqlobj = sqlobj || {
-        title: `sql ${this.sqlTabs.length + 1}`,
-        sql: '',
-      };
-      this.$store.commit('setSqlTabs', sqlobj);
-      this.SwitchTab(this.sqlTabs.length - 1);
-    },
-    // 右键快捷操作
-    AppendSqlS(tablename) {
-      const fields = this.tables.find((item) => item.name === tablename).fields;
-      console.log(fields);
-      const sqlstr = `SELECT ${fields.join(',')} \nFROM ${tablename}`;
-      this.txt = `${this.txt}\n${sqlstr} \nWHERE \nORDER BY \nLIMIT `;
-      this.Keyup();
-    },
-    AppendSqlU(tablename) {
-      const fields = this.tables.find((item) => item.name === tablename).fields;
-      const sqlstr = `UPDATE ${tablename} \nSET ${fields.join('="",\n')}=""`;
-      this.txt = `${this.txt}\n${sqlstr} \nWHERE `;
-      this.Keyup();
-    },
-    AppendSqlI(tablename) {
-      const fields = this.tables.find((item) => item.name === tablename).fields;
-      const sqlstr = `INSERT INTO ${tablename} (${fields.join(
-        ',',
-      )}) \nVALUES ('${fields.join("','")}')`;
-      this.txt = `${this.txt}\n${sqlstr} `;
-      this.Keyup();
-    },
-    AppendSqlD(tablename) {
-      const fields = this.tables.find((item) => item.name === tablename).fields;
-      const sqlstr = `DELETE FROM ${tablename} \nWHERE ${fields.join(
-        '="" AND \n',
-      )}=""`;
-      this.txt = `${this.txt}\n${sqlstr} `;
-      this.Keyup();
-    },
-  },
+    }
+    this.activeIndex = index;
+    this.txt = this.sqlTabs[index].sql;
+    this.Keyup();
+  }
+
+  DelTab(index: number) {
+    if (this.sqlTabs.length === 1) {
+      // 只剩一个tab，清空内容
+      this.sqlTabs[0].title = 'sql 1';
+      this.sqlTabs[0].sql = '';
+      this.txt = '';
+    } else {
+      // 删除并激活前面一个tag
+      this.sqlTabs.splice(index, 1);
+      this.$store.commit('setSqlTabs', this.sqlTabs);
+      this.$nextTick(() => {
+        if (this.activeIndex === index) this.SwitchTab(index ? index - 1 : 0);
+        if (this.activeIndex > index) this.activeIndex -= 1;
+      });
+    }
+  }
+
+  AddTab(sqlobj: PlainObject) {
+    sqlobj = sqlobj || {
+      title: `sql ${this.sqlTabs.length + 1}`,
+      sql: '',
+    };
+    this.$store.commit('setSqlTabs', sqlobj);
+    this.SwitchTab(this.sqlTabs.length - 1);
+  }
+
+  // 右键快捷操作
+  AppendSqlS(tablename: string) {
+    const fields = this.tables.find(
+      (item: { name: string }) => item.name === tablename,
+    ).fields;
+    console.log(fields);
+    const sqlstr = `SELECT ${fields.join(',')} \nFROM ${tablename}`;
+    this.txt = `${this.txt}\n${sqlstr} \nWHERE \nORDER BY \nLIMIT `;
+    this.Keyup();
+  }
+
+  AppendSqlU(tablename: string) {
+    const fields = this.tables.find(
+      (item: { name: string }) => item.name === tablename,
+    ).fields;
+    const sqlstr = `UPDATE ${tablename} \nSET ${fields.join('="",\n')}=""`;
+    this.txt = `${this.txt}\n${sqlstr} \nWHERE `;
+    this.Keyup();
+  }
+
+  AppendSqlI(tablename: string) {
+    const fields = this.tables.find(
+      (item: { name: string }) => item.name === tablename,
+    ).fields;
+    const sqlstr = `INSERT INTO ${tablename} (${fields.join(
+      ',',
+    )}) \nVALUES ('${fields.join("','")}')`;
+    this.txt = `${this.txt}\n${sqlstr} `;
+    this.Keyup();
+  }
+
+  AppendSqlD(tablename: string) {
+    const fields = this.tables.find(
+      (item: { name: string }) => item.name === tablename,
+    ).fields;
+    const sqlstr = `DELETE FROM ${tablename} \nWHERE ${fields.join(
+      '="" AND \n',
+    )}=""`;
+    this.txt = `${this.txt}\n${sqlstr} `;
+    this.Keyup();
+  }
+
   mounted() {
     this.$store.commit('getSqlTabs');
     this.SwitchTab(0);
@@ -211,19 +222,16 @@ export default {
     this.$Bus.$on('table-update', this.AppendSqlU);
     this.$Bus.$on('table-insert', this.AppendSqlI);
     this.$Bus.$on('table-delete', this.AppendSqlD);
-    // this.$refs.sql.addEventListener('cut', this.Keyup)
-    // this.$refs.sql.addEventListener('paste', this.Keyup)
-  },
+  }
+
   beforeDestroy() {
     this.$Bus.$off('new-sql', this.AddTab);
     this.$Bus.$off('table-select', this.AppendSqlS);
     this.$Bus.$off('table-update', this.AppendSqlU);
     this.$Bus.$off('table-insert', this.AppendSqlI);
     this.$Bus.$off('table-delete', this.AppendSqlD);
-    // this.$refs.sql.removeEventListener('cut', this.Keyup)
-    // this.$refs.sql.removeEventListener('paste', this.Keyup)
-  },
-};
+  }
+}
 </script>
 
 <style scoped>

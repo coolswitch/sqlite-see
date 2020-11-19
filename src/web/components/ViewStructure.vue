@@ -4,18 +4,15 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "ViewStructure",
-  props: {
-    msg: String
-  },
-  computed: {
-    structure() {
-      return this.$store.state.activeTable.sql.replace(/ {6}/g, "\n      ");
-    }
+<script lang="ts">
+import { Component, Vue } from 'vue-property-decorator';
+
+@Component
+export default class ViewStructure extends Vue {
+  get structure() {
+    return this.$store.state.activeTable.sql.replace(/ {6}/g, '\n      ');
   }
-};
+}
 </script>
 
 <style scoped>

@@ -36,25 +36,87 @@
   </div>
 </template>
 
-<script>
-import { mapState } from 'vuex';
+<script lang="ts">
+import { Component, Vue } from 'vue-property-decorator';
 import { ListenerOnMain } from '../utils/ipc';
 
-export default {
-  name: 'LeftWarp',
-  data() {
-    return {
-      database: [],
-      tables: [],
-      dbname: '请选择一个数据库',
-      dbdir: '',
-    };
-  },
-  computed: {
-    ...mapState(['activeTable']),
-  },
-  created() {
-    console.log('root?', this.$root);
+@Component
+export default class LeftWarp extends Vue {
+  database: PlainObject[] = [];
+
+  tables: PlainObject[] = [];
+
+  dbname = '请选择一个数据库';
+
+  dbdir = '';
+
+  get activeTable() {
+    return this.$store.state.activeTable;
+  }
+
+  OpenDB(dir: string) {
+    this.$Sendmsg2main('db-structure', dir)
+      .then((tables) => {
+        this.dbdir = dir;
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        this.dbname = dir.match(/\/([^\\/]*)\.sqlite/)![1];
+        this.tables = tables as PlainObject[];
+        this.$store.commit('setActiveDB', { dir, tables });
+        this.switchTable(undefined);
+        localStorage.setItem('db-dir', dir);
+      })
+      .catch((err) => {
+        if (err.message.includes('数据库连接失败')) {
+          err.message = '数据库连接失败';
+          this.database = this.database.filter((t) => t.dir !== dir);
+          this.$store.commit('setActiveDB', null);
+          this.switchTable(undefined);
+        }
+        this.$message.error(err.message);
+      });
+  }
+
+  LoadDBList() {
+    let dblist: string | string[] = localStorage.getItem('db-list') || '';
+    dblist = dblist ? dblist.substr(1).split(',') : [];
+    this.database = dblist.map((db: string) => {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const name = db.match(/\/([^\\/]*)\.sqlite/)![1],
+        path = db.replace(`/${name}.sqlite`, '').replace(`/Users`, '');
+      return { name, path, dir: db };
+    });
+  }
+
+  OpenNewFile() {
+    this.$Sendmsg2main('open-dbfile').then((dbfiles) => {
+      if (dbfiles && dbfiles.length) {
+        localStorage.setItem('db-dir', dbfiles[0]);
+        this.OpenDB(dbfiles[0]);
+
+        // 更新数据库列表、并重新加载
+        let dblist = localStorage.getItem('db-list');
+        dblist = dblist ? dblist.replace(`,${dbfiles[0]}`, '') : '';
+        localStorage.setItem('db-list', `${dblist},${dbfiles[0]}`);
+        this.LoadDBList();
+      }
+    });
+  }
+
+  switchTable(item: PlainObject | undefined) {
+    this.$store.commit('setActiveTable', item);
+  }
+
+  Refresh() {
+    const activeTable = this.activeTable;
+    this.switchTable(undefined);
+    this.$Sendmsg2main('db-structure', this.dbdir).then((tables) => {
+      this.tables = tables as PlainObject[];
+      this.$store.commit('setActiveDB', { dir: this.dbdir, tables });
+      this.switchTable(activeTable);
+    });
+  }
+
+  mounted() {
     this.LoadDBList();
     const dir = localStorage.getItem('db-dir');
     if (dir) this.OpenDB(dir);
@@ -63,68 +125,11 @@ export default {
     ListenerOnMain('user-open-file').then((newfilepath) => {
       this.OpenDB(newfilepath);
     });
-  },
-  methods: {
-    OpenDB(dir) {
-      this.$Sendmsg2main('db-structure', dir)
-        .then((tables) => {
-          this.dbdir = dir;
-          this.dbname = dir.match(/\/([^\\/]*)\.sqlite/)[1];
-          this.tables = tables;
-          this.$store.commit('setActiveDB', { dir, tables });
-          this.switchTable(undefined);
-          localStorage.setItem('db-dir', dir);
-        })
-        .catch((err) => {
-          if (err.message.includes('数据库连接失败')) {
-            err.message = '数据库连接失败';
-            this.database = this.database.filter((t) => t.dir !== dir);
-            this.$store.commit('setActiveDB', null);
-            this.switchTable(undefined);
-          }
-          this.$message.error(err.message);
-        });
-    },
-    LoadDBList() {
-      let dblist = localStorage.getItem('db-list');
-      dblist = dblist ? dblist.substr(1).split(',') : [];
-      this.database = dblist.map((db) => {
-        const name = db.match(/\/([^\\/]*)\.sqlite/)[1],
-          path = db.replace(`/${name}.sqlite`, '').replace(`/Users`, '');
-        return { name, path, dir: db };
-      });
-    },
-    OpenNewFile() {
-      this.$Sendmsg2main('open-dbfile').then((dbfiles) => {
-        if (dbfiles && dbfiles.length) {
-          localStorage.setItem('db-dir', dbfiles[0]);
-          this.OpenDB(dbfiles[0]);
-
-          // 更新数据库列表、并重新加载
-          let dblist = localStorage.getItem('db-list');
-          dblist = dblist ? dblist.replace(`,${dbfiles[0]}`, '') : '';
-          localStorage.setItem('db-list', `${dblist},${dbfiles[0]}`);
-          this.LoadDBList();
-        }
-      });
-    },
-    switchTable(item) {
-      this.$store.commit('setActiveTable', item);
-    },
-    Refresh() {
-      const activeTable = this.activeTable;
-      this.switchTable(undefined);
-      this.$Sendmsg2main('db-structure', this.dbdir).then((tables) => {
-        this.tables = tables;
-        this.$store.commit('setActiveDB', { dir: this.dbdir, tables });
-        this.switchTable(activeTable);
-      });
-    },
-  },
-};
+  }
+}
 </script>
 
-<style scoped>
+<style scoped lang="less">
 .left-warp {
   width: 300px;
   height: 100vh;
@@ -143,29 +148,30 @@ export default {
 li {
   padding: 5px 16px;
   cursor: pointer;
-}
-li:hover,
-li.active {
-  font-weight: bold;
-  background: linear-gradient(
-    145deg,
-    rgba(70, 195, 243, 0.2) 0.2%,
-    #ffffff,
-    #ffffff
-  );
-}
-li.title {
-  background: #eee;
-  font-size: 16px;
-  font-weight: 500;
-  margin-bottom: 10px;
-  border-top: 1px solid rgba(70, 195, 243, 0.1);
-  border-bottom: 1px solid rgba(70, 195, 243, 0.1);
-  position: relative;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
-  padding-right: 50px;
+
+  &:hover,
+  &.active {
+    font-weight: bold;
+    background: linear-gradient(
+      145deg,
+      rgba(70, 195, 243, 0.2) 0.2%,
+      #ffffff,
+      #ffffff
+    );
+  }
+  &.title {
+    background: #eee;
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 10px;
+    border-top: 1px solid rgba(70, 195, 243, 0.1);
+    border-bottom: 1px solid rgba(70, 195, 243, 0.1);
+    position: relative;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    padding-right: 50px;
+  }
 }
 
 .database-warp {
@@ -179,20 +185,20 @@ li.title {
   margin: 10px;
   opacity: 0.3;
   transition: opacity 0.3s;
-}
-.database-warp:hover {
-  opacity: 1;
-}
-.database-warp:hover .dblist {
-  display: block;
-}
-.database-warp::before {
-  content: ' ';
-  position: absolute;
-  width: 100%;
-  height: 10px;
-  bottom: 30px;
-  left: 0px;
+  &:hover {
+    opacity: 1;
+    .dblist {
+      display: block;
+    }
+  }
+  &::before {
+    content: ' ';
+    position: absolute;
+    width: 100%;
+    height: 10px;
+    bottom: 30px;
+    left: 0px;
+  }
 }
 .dblist {
   position: absolute;
@@ -206,20 +212,23 @@ li.title {
   max-height: 200px;
   overflow: auto;
   display: none;
-}
-.dblist p {
-  padding: 0 10px 0 30px;
-  line-height: 30px;
-}
-.dblist p:hover {
-  background: #ccc;
-}
-.dblist p.active {
-  padding-left: 10px;
-}
-.dblist p.active:before {
-  content: '✔';
-  margin-right: 6px;
+  p {
+    padding: 0 10px 0 30px;
+    line-height: 30px;
+    &:hover {
+      background: #ccc;
+    }
+    &.active {
+      padding-left: 10px;
+      .dbpath {
+        padding-left: 20px;
+      }
+    }
+    &.active:before {
+      content: '✔';
+      margin-right: 6px;
+    }
+  }
 }
 .dbpath {
   font-style: normal;
@@ -232,9 +241,6 @@ li.title {
   line-height: 12px;
   padding-bottom: 10px;
 }
-.dblist p.active .dbpath {
-  padding-left: 20px;
-}
 .dir {
   display: inline-block;
   position: absolute;
@@ -245,9 +251,9 @@ li.title {
   font-size: 12px;
   line-height: 25px;
   cursor: pointer;
-}
-.dir:hover {
-  color: #999;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.1), #ffffff);
+  &:hover {
+    color: #999;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.1), #ffffff);
+  }
 }
 </style>
